@@ -1,5 +1,11 @@
 # jeryu-tool-finder
 
+[![CI](https://img.shields.io/badge/CI-check%20%7C%20score%20%7C%20security-blue)](.github/workflows/ci.yml)
+[![jankurai score](https://img.shields.io/badge/jankurai-0%20caps-brightgreen)](agent/audit-policy.toml)
+
+Agents start at **[AGENTS.md](AGENTS.md)** (the agent entrypoint); deeper docs
+are indexed there and under [`docs/`](docs/).
+
 The **tool-discovery** arm of the jeryu family. Powerful scripts that scan
 **every** repo at once, find code that is duplicated across **more than one
 repo**, and turn the strongest clusters into agent-readable dossiers — the leads
@@ -33,6 +39,21 @@ The engine is invoked as a **binary at runtime** (`JERYU_CODEGRAPH_BIN`, then
 `cargo run`). This repo takes **no Cargo dependency** on `jeryu-codegraph`, so the
 family pin graph is unchanged — it is pure scripts + docs.
 
+## Quick start
+
+```bash
+bash scripts/ci-doctor.sh   # confirm required tooling (python3, git, jankurai)
+just                        # the gate: check + score + security
+# or without `just`:
+bash scripts/ci-local.sh    # same lanes CI runs, in CI order
+```
+
+Wire the local gate to run before every push:
+
+```bash
+git config core.hooksPath ops/git-hooks
+```
+
 ## Local commands
 
 ```bash
@@ -41,6 +62,14 @@ just dossier    # render dossiers from the latest scan
 just summary    # golden-box registry numbers (from jeryu-tool)
 just            # the gate: check + score + security
 ```
+
+## Docs
+
+- [docs/architecture.md](docs/architecture.md) — components, boundaries, data flow
+- [docs/tool-finder.md](docs/tool-finder.md) — dossier schema, LOC-saved definition
+- [docs/testing.md](docs/testing.md) — CI lanes, the dossier selftest, CI parity
+- [docs/release.md](docs/release.md) — version source, release gate, rollback
+- [CHANGELOG.md](CHANGELOG.md) — release notes
 
 Cross-repo cluster discovery and the `repo_count` shape live in
 `jeryu-intelligence/crates/jeryu-codegraph` (`tool-build scan-family`). See

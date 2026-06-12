@@ -1,6 +1,21 @@
 {
   "tests": {
+    ".github/": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify hosted workflow runs the same lanes as local (parity)"
+    },
+    ".gitignore": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the generated-zone exclusions stay consistent with agent/generated-zones.toml"
+    },
     ".github/**": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify hosted workflow runs the same lanes as local (parity)"
+    },
+    ".github/workflows/": {
       "command": "just check && just score",
       "lane": "ci",
       "purpose": "verify hosted workflow runs the same lanes as local (parity)"
@@ -9,6 +24,11 @@
       "command": "just score",
       "lane": "score",
       "purpose": "verify split metadata and agent maps"
+    },
+    "CHANGELOG.md": {
+      "command": "just score",
+      "lane": "score",
+      "purpose": "verify release notes stay routed through the score lane"
     },
     "README.md": {
       "command": "just check",
@@ -35,15 +55,40 @@
       "lane": "docs",
       "purpose": "verify agent-readable docs remain routed and auditable"
     },
+    "fixtures/": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the dossier selftest fixture stays valid"
+    },
     "fixtures/**": {
       "command": "just check",
       "lane": "check",
       "purpose": "verify the dossier selftest fixture stays valid"
     },
+    "ops/": {
+      "command": "just check && just score && just security",
+      "lane": "ci",
+      "purpose": "verify the CI gate scripts parse and stay reproducible"
+    },
     "ops/**": {
+      "command": "just check && just score && just security",
+      "lane": "ci",
+      "purpose": "verify the CI gate scripts parse and stay reproducible"
+    },
+    "ops/ci/": {
+      "command": "just check && just score && just security",
+      "lane": "ci",
+      "purpose": "verify each CI lane script parses and runs at local/CI parity"
+    },
+    "ops/git-hooks/": {
+      "command": "just check && just score && just security",
+      "lane": "ci",
+      "purpose": "verify the pre-push hook delegates to the same local lanes"
+    },
+    "scripts/": {
       "command": "just check",
       "lane": "check",
-      "purpose": "verify the CI gate scripts parse and stay reproducible"
+      "purpose": "verify the finder scripts byte-compile and the dossier selftest passes"
     },
     "scripts/**": {
       "command": "just check",

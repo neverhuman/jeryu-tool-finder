@@ -6,6 +6,7 @@
     ".jankurai/": "audit",
     ".jankurai/**": "audit",
     "AGENTS.md": "split",
+    "CHANGELOG.md": "release",
     "README.md": "docs",
     "VERSION": "release",
     "Justfile": "ops",
@@ -19,6 +20,7 @@
     "ops/": "ops",
     "ops/**": "ops",
     "ops/ci/": "ops",
+    "ops/git-hooks/": "ops",
     "scripts/": "finder",
     "scripts/**": "finder"
   },

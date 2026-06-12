@@ -20,3 +20,19 @@ valid against `jeryu-tool`'s `ops/registry_summary.py --check`.
 not hand-edit or commit its contents. Required local commands are `just check`,
 `just score`, and `just security`; `just` runs the full gate. There is no `fast`
 lane here — the jankurai pin is owned by `jeryu-tool`, not this repo.
+
+## Docs index
+
+Durable detail lives in agent-readable docs, routed from here:
+
+- `docs/architecture.md` — components, boundaries, and the discovery data flow.
+- `docs/tool-finder.md` — dossier schema, pipeline, and the LOC-saved definition.
+- `docs/testing.md` — the CI lanes, the dossier selftest, and CI/local parity.
+- `docs/release.md` — version source, the release gate, integrity, and rollback.
+- `CHANGELOG.md` — release notes.
+- `ops/AGENTS.md` — the CI-gate cell: owns / forbidden / proof-lane guidance.
+
+Machine-readable routing: `agent/owner-map.json` (who owns each path),
+`agent/test-map.json` (the proof route for each path), `agent/proof-lanes.toml`
+(the lanes), `agent/boundaries.toml` (the scripts-only profile), and
+`agent/generated-zones.toml` (the `dossiers/` generated zone).
