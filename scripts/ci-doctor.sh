@@ -4,7 +4,7 @@
 set -euo pipefail
 
 # Required: the lanes (check/score/security) cannot run without these.
-required=(bash python3 git jankurai)
+required=(bash python3 git cargo jankurai)
 # Optional: security.sh runs these when present, and `just` is the lane wrapper.
 optional=(just gitleaks actionlint)
 

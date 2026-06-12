@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
-# Structure check: the finder scripts compile, the shell entrypoints are valid,
-# and the dossier logic passes its hermetic selftest (no engine/cargo needed).
+# Structure check: the Rust finder builds clean (fmt/clippy/test) and the
+# shell entrypoints are valid. The dossier fixture selftest rides cargo test.
 set -euo pipefail
 source ops/ci/lib.sh
-
-# Python scripts must byte-compile.
-python3 -m py_compile scripts/*.py
 
 # Shell entrypoints must parse.
 for script in ops/*.sh ops/ci/*.sh; do
@@ -13,7 +10,8 @@ for script in ops/*.sh ops/ci/*.sh; do
   bash -n "$script"
 done
 
-# Dossier enrichment must survive against the bundled fixture (offline).
-python3 scripts/dossier.py --selftest
+cargo fmt --check
+cargo clippy --all-targets -- -D warnings
+cargo test
 
 printf 'check ok: %s\n' "$(pwd)"

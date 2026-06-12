@@ -31,6 +31,14 @@ jobs:
         with:
           path: ~/.cargo/bin/jankurai
           key: jankurai-${{ env.JANKURAI_REV }}
+      - name: Cache cargo (finder build)
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: finder-cargo-${{ hashFiles('Cargo.lock', 'rust-toolchain.toml') }}
       - name: Install pinned jankurai
         run: |
           if ! jankurai --version 2>/dev/null | grep -qx "jankurai 1.6.10"; then

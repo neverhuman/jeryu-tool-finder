@@ -1,0 +1,41 @@
+# jeryu-tool-finder — all-Rust cross-repo duplicate-code discovery.
+#
+# The engine (scanning, overlap merging, pattern families, enrichment) lives in
+# jeryu-codegraph and is consumed AS A LIBRARY: no subprocess dance, one
+# implementation shared with the live API server. Release builds consume the
+# pinned git tag; the [patch] section redirects to the local split checkout for
+# family development, mirroring jeryu-deploy's wiring.
+
+[package]
+name = "jeryu-tool-finder"
+version = "5.0.0"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/neverhuman/jeryu-tool-finder"
+rust-version = "1.95"
+description = "Cross-repo duplicate-code discovery: scan, dossier, and propose shared tools"
+
+[dependencies]
+jeryu-codegraph = { git = "https://github.com/neverhuman/jeryu-intelligence.git", tag = "jeryu-intelligence-v5.0.0-split.0", package = "jeryu-codegraph" }
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+[dev-dependencies]
+proptest = "1"
+tempfile = "3"
+
+[[bin]]
+name = "jeryu-tool-finder"
+path = "src/main.rs"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+# Local split development patches. Release builds consume the pinned tag above;
+# the tag must contain the v2 system-scan engine before un-patched CI builds.
+[patch."https://github.com/neverhuman/jeryu-intelligence.git"]
+jeryu-codegraph = { path = "../jeryu-intelligence/crates/jeryu-codegraph" }
+jeryu-rustjet = { path = "../jeryu-intelligence/crates/jeryu-rustjet" }

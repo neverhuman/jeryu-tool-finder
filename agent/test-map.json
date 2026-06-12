@@ -5,11 +5,6 @@
       "lane": "ci",
       "purpose": "verify hosted workflow runs the same lanes as local (parity)"
     },
-    ".gitignore": {
-      "command": "just check",
-      "lane": "check",
-      "purpose": "verify the generated-zone exclusions stay consistent with agent/generated-zones.toml"
-    },
     ".github/**": {
       "command": "just check && just score",
       "lane": "ci",
@@ -19,6 +14,11 @@
       "command": "just check && just score",
       "lane": "ci",
       "purpose": "verify hosted workflow runs the same lanes as local (parity)"
+    },
+    ".gitignore": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the generated-zone exclusions stay consistent with agent/generated-zones.toml"
     },
     "AGENTS.md": {
       "command": "just score",
@@ -30,6 +30,21 @@
       "lane": "score",
       "purpose": "verify release notes stay routed through the score lane"
     },
+    "Cargo.lock": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the locked dependency graph still builds and tests green"
+    },
+    "Cargo.toml": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify the engine pin/patch wiring builds and the gate stays green"
+    },
+    "Justfile": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify the canonical local command wrappers stay reproducible"
+    },
     "README.md": {
       "command": "just check",
       "lane": "check",
@@ -40,15 +55,15 @@
       "lane": "score",
       "purpose": "verify version source stays aligned with release evidence"
     },
-    "Justfile": {
-      "command": "just check && just score",
-      "lane": "ci",
-      "purpose": "verify the canonical local command wrappers stay reproducible"
-    },
     "agent/": {
       "command": "just score",
       "lane": "score",
       "purpose": "verify agent metadata parses and routes proof lanes"
+    },
+    "deny.toml": {
+      "command": "just security",
+      "lane": "security",
+      "purpose": "verify the dependency-review policy stays parseable and enforced in CI"
     },
     "docs/": {
       "command": "just check && just score",
@@ -85,15 +100,40 @@
       "lane": "ci",
       "purpose": "verify the pre-push hook delegates to the same local lanes"
     },
+    "rust-toolchain.toml": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
+    },
     "scripts/": {
       "command": "just check",
       "lane": "check",
-      "purpose": "verify the finder scripts byte-compile and the dossier selftest passes"
+      "purpose": "verify the gate wrapper shells parse and route the same lanes"
     },
     "scripts/**": {
       "command": "just check",
       "lane": "check",
-      "purpose": "verify the finder scripts byte-compile and the dossier selftest passes"
+      "purpose": "verify the gate wrapper shells parse and route the same lanes"
+    },
+    "src/": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
+    },
+    "src/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
+    },
+    "tests/": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
+    },
+    "tests/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
     }
   },
   "workspace": "jeryu-tool-finder"

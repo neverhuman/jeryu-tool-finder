@@ -7,7 +7,7 @@ default:
   ./ops/ci/security.sh
 
 check:
-  ./ops/ci/check.sh   # script syntax/compile + dossier selftest
+  ./ops/ci/check.sh   # cargo fmt/clippy/test + shell syntax
 
 score:
   ./ops/ci/score.sh   # jankurai audit repo-score
@@ -15,18 +15,25 @@ score:
 security:
   ./ops/ci/security.sh # gitleaks actionlint env-file
 
-# Discovery surface.
+# Dependency review (advisories, licenses, sources). Needs network; CI runs it.
+security-deps:
+  JERYU_SECURITY_NETWORK=1 cargo deny check
+
+build:
+  cargo build --release
+
+# Discovery surface (all-Rust; the engine is linked as a library).
 scan *ARGS:
-  python3 scripts/scan_family.py {{ARGS}}
+  cargo run --release -- scan {{ARGS}}
 
 dossier *ARGS:
-  python3 scripts/dossier.py {{ARGS}}
+  cargo run --release -- dossier {{ARGS}}
 
 propose CLUSTER *ARGS:
-  python3 scripts/propose.py {{CLUSTER}} {{ARGS}}
+  cargo run --release -- propose {{CLUSTER}} {{ARGS}}
 
 summary *ARGS:
-  python3 scripts/registry_summary.py {{ARGS}}
+  cargo run --release -- summary {{ARGS}}
 
 profile:
   printf '%s\n' "public-portal"

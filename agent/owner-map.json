@@ -7,10 +7,13 @@
     ".jankurai/**": "audit",
     "AGENTS.md": "split",
     "CHANGELOG.md": "release",
+    "Cargo.lock": "finder",
+    "Cargo.toml": "finder",
+    "Justfile": "ops",
     "README.md": "docs",
     "VERSION": "release",
-    "Justfile": "ops",
     "agent/": "agent",
+    "deny.toml": "ops",
     "docs/": "docs",
     "docs/**": "docs",
     "dossiers/": "finder",
@@ -21,8 +24,13 @@
     "ops/**": "ops",
     "ops/ci/": "ops",
     "ops/git-hooks/": "ops",
+    "rust-toolchain.toml": "ops",
     "scripts/": "finder",
-    "scripts/**": "finder"
+    "scripts/**": "finder",
+    "src/": "finder",
+    "src/**": "finder",
+    "tests/": "finder",
+    "tests/**": "finder"
   },
   "workspace": "jeryu-tool-finder"
 }

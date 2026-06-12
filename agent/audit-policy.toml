@@ -1,20 +1,24 @@
 schema_version = "1.0.0"
 workspace = "jeryu-tool-finder"
-# public-portal profile: scripts + docs, ZERO product code (the cross-repo
-# engine lives in jeryu-intelligence and is invoked as a runtime binary).
+# public-portal profile (family convention for -tool/-tool-finder repos), now
+# carrying a single all-Rust binary (src/) that consumes the jeryu-codegraph
+# engine as a pinned-tag library, plus the ops/ CI gate.
+
 #
-# Reviewed floor = 68. A fully clean audit of this repo (0 caps, 0 hard findings,
-# 0 conformance blockers) tops out at 68: several weighted dimensions are
-# structurally unreachable for a scripts+docs discovery repo — there is no DB or
-# product data (data-truth ceiling), no build system (build-speed ceiling), this
-# is a tool PRODUCER not a tool CONSUMER (tool-adoption ceiling), and the security
-# dimension is capped the same way the sibling control-plane repo jeryu-tool is.
-# This mirrors jeryu-tool's documented reviewed floor (65, ceiling 66); this repo
-# carries real discovery scripts + a hermetic dossier selftest, so it scores 68 —
-# two points above jeryu-tool — and the floor is set there. The floor is NOT a
-# way to hide caps: the hard gates below are absolute and ops/ci/score.sh fails on
+# Reviewed floor = 75. The 2026-06 Rust rewrite (Python scripts -> cargo
+# binary with fmt/clippy/test + property tests, an end-to-end pipeline test, a
+# typed exception surface, and a dependency-review security lane) measures a
+# clean full-scan 76 (0 caps, 0 hard findings) under the family-pinned auditor
+# (JERYU_JANKURAI_BIN, the same binary the Layer-2 scoring funnel runs).
+# Several weighted dimensions are structurally capped for a small discovery
+# tool (no DB -> data-truth ceiling, no heavy build graph -> build-speed
+# ceiling), mirroring jeryu-tool's documented profile-calibrated floor. The
+# floor sits one point under the reviewed score to absorb scanner jitter, NOT
+# to hide caps: the hard gates below are absolute and ops/ci/score.sh fails on
 # ANY cap regardless of score (hard_findings_allowed = 0, caps must be 0).
-minimum_score = 68
+# Always score with --full — the [smart] incremental scan gives inconsistent
+# caps.
+minimum_score = 75
 hard_findings_allowed = 0
 required_tool = "jankurai"
 required_tool_version = "1.6.10"
@@ -23,4 +27,5 @@ required_tool_version = "1.6.10"
 excluded_paths = [
   ".jankurai/",
   "dossiers/",   # generated cluster dossiers; produced by just scan + just dossier
+  "target/",     # cargo build output
 ]
