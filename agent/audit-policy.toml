@@ -1,0 +1,15 @@
+schema_version = "1.0.0"
+workspace = "jeryu-tool-finder"
+# public-portal profile: scripts + docs, ZERO product code (the cross-repo
+# engine lives in jeryu-intelligence and is invoked as a runtime binary). The
+# reviewed floor for this repo is recorded below; the hard gates are absolute.
+minimum_score = 70
+hard_findings_allowed = 0
+required_tool = "jankurai"
+required_tool_version = "1.6.10"
+
+[scan]
+excluded_paths = [
+  ".jankurai/",
+  "dossiers/",   # generated cluster dossiers; produced by just scan + just dossier
+]

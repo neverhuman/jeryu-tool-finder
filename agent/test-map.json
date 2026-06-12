@@ -1,0 +1,55 @@
+{
+  "tests": {
+    ".github/**": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify hosted workflow runs the same lanes as local (parity)"
+    },
+    "AGENTS.md": {
+      "command": "just score",
+      "lane": "score",
+      "purpose": "verify split metadata and agent maps"
+    },
+    "README.md": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify root navigation remains current"
+    },
+    "VERSION": {
+      "command": "just score",
+      "lane": "score",
+      "purpose": "verify version source stays aligned with release evidence"
+    },
+    "Justfile": {
+      "command": "just check && just score",
+      "lane": "ci",
+      "purpose": "verify the canonical local command wrappers stay reproducible"
+    },
+    "agent/": {
+      "command": "just score",
+      "lane": "score",
+      "purpose": "verify agent metadata parses and routes proof lanes"
+    },
+    "docs/": {
+      "command": "just check && just score",
+      "lane": "docs",
+      "purpose": "verify agent-readable docs remain routed and auditable"
+    },
+    "fixtures/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the dossier selftest fixture stays valid"
+    },
+    "ops/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the CI gate scripts parse and stay reproducible"
+    },
+    "scripts/**": {
+      "command": "just check",
+      "lane": "check",
+      "purpose": "verify the finder scripts byte-compile and the dossier selftest passes"
+    }
+  },
+  "workspace": "jeryu-tool-finder"
+}

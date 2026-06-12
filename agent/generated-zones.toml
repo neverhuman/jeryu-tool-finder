@@ -1,0 +1,9 @@
+[[zones]]
+path = ".jankurai/**"
+generator = "just score"
+manual_edits = false
+
+[[zones]]
+path = "dossiers/**"
+generator = "python3 scripts/scan_family.py && python3 scripts/dossier.py"
+manual_edits = false

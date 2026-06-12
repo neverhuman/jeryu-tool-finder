@@ -1,0 +1,26 @@
+{
+  "owners": {
+    ".github/": "ops",
+    ".github/**": "ops",
+    ".gitignore": "workspace",
+    ".jankurai/": "audit",
+    ".jankurai/**": "audit",
+    "AGENTS.md": "split",
+    "README.md": "docs",
+    "VERSION": "release",
+    "Justfile": "ops",
+    "agent/": "agent",
+    "docs/": "docs",
+    "docs/**": "docs",
+    "dossiers/": "finder",
+    "dossiers/**": "finder",
+    "fixtures/": "finder",
+    "fixtures/**": "finder",
+    "ops/": "ops",
+    "ops/**": "ops",
+    "ops/ci/": "ops",
+    "scripts/": "finder",
+    "scripts/**": "finder"
+  },
+  "workspace": "jeryu-tool-finder"
+}
