@@ -65,3 +65,12 @@ re-tag if a repair release is needed. Do **not** overwrite a published split tag
 publish a new repair tag instead. `dossiers/` is a regenerated zone, so no
 release rollback ever needs to touch it; re-run `just scan && just dossier` to
 rebuild it from the engine.
+
+## Auditor-only CI cutovers
+
+Changing the governed auditor is not a product release and leaves `VERSION`,
+split tags, and product artifacts unchanged. Its release gate requires the
+exact protected `jeryu-tool` source/tag/binary receipt, clean exact-head CI,
+and independent approval before protected merge. The backup, monitoring,
+rate-limit or abuse, checksum, SBOM, provenance, and rollback controls above
+remain mandatory for any later product promotion.

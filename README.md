@@ -75,3 +75,9 @@ Cross-repo cluster discovery and the `repo_count` shape live in
 `jeryu-intelligence/crates/jeryu-codegraph` (`tool-build scan-family`). See
 `docs/tool-finder.md` for the dossier schema, the LOC-saved definition, and the
 known `candidate_repos` caveat.
+
+## Governed auditor
+
+CI invokes only the receipt-verified `/home/ubuntu/.jeryu/bin/jankurai` identity
+rendered by `jeryu-tool`. The 1.6.11 auditor cutover is CI authority only; it
+does not change this repository's product version, release tag, or artifacts.
