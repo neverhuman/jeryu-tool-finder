@@ -27,6 +27,7 @@
     "rust-toolchain.toml": "ops",
     "scripts/": "finder",
     "scripts/**": "finder",
+    "tools/": "ops",
     "src/": "finder",
     "src/**": "finder",
     "tests/": "finder",

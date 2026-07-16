@@ -115,6 +115,11 @@
       "lane": "check",
       "purpose": "verify the gate wrapper shells parse and route the same lanes"
     },
+    "tools/": {
+      "command": "just security && just score",
+      "lane": "security",
+      "purpose": "verify the canonical supply-chain wrapper and its receipt stay fail-closed"
+    },
     "src/": {
       "command": "just check",
       "lane": "check",
