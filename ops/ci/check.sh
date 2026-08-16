@@ -14,6 +14,7 @@ done
 bash tests/ci_local_dispatch_test.sh
 bash tests/source_authority_test.sh
 bash tests/score_auditor_test.sh
+bash tests/score_auditor_git_env_test.sh
 
 cargo fmt --check
 metadata="$(cargo metadata --locked --offline --format-version 1)"

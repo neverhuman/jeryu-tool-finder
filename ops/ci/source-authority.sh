@@ -169,3 +169,30 @@ jeryu_source_verify() {
   [[ "$(jeryu_tracked_inputs_sha256)" == "$expected_inputs" ]] ||
     { jeryu_source_fail 'physical tracked inputs moved during proof'; return 1; }
 }
+
+# Reject a Jankurai score report whose Git identity/toplevel does not match the
+# bound physical source snapshot. Callers pass the report path and expected HEAD.
+jeryu_require_score_report_matches_source() {
+  local report_path="$1" expected_head="$2"
+  local report_repo report_git_head report_git_dirty
+  [[ -f "$report_path" && ! -L "$report_path" ]] ||
+    { jeryu_source_fail 'score report is not a physical regular file'; return 1; }
+  [[ "$expected_head" =~ ^[0-9a-f]{40}$ ]] ||
+    { jeryu_source_fail 'expected source HEAD is malformed'; return 1; }
+  report_repo="$(jq -er '.repo' "$report_path")" ||
+    { jeryu_source_fail 'score report is missing repo identity'; return 1; }
+  [[ "$report_repo" == "." ]] ||
+    { jeryu_source_fail "score report repo identity is ${report_repo}, expected ."; return 1; }
+  report_git_head="$(jq -er '.git.head' "$report_path")" ||
+    { jeryu_source_fail 'score report is missing git.head'; return 1; }
+  [[ "$report_git_head" =~ ^[0-9a-f]{7,40}$ ]] ||
+    { jeryu_source_fail "score report git.head is malformed: ${report_git_head}"; return 1; }
+  [[ "$expected_head" == "$report_git_head"* ]] ||
+    { jeryu_source_fail "score report git.head ${report_git_head} does not match bound source ${expected_head}"; return 1; }
+  report_git_dirty="$(jq -r 'if (.git|type)=="object" and (.git|has("dirty_worktree")) then .git.dirty_worktree elif has("dirty_worktree") then .dirty_worktree else empty end | tostring' "$report_path")" ||
+    { jeryu_source_fail 'score report is missing dirty_worktree'; return 1; }
+  [[ -n "$report_git_dirty" ]] ||
+    { jeryu_source_fail 'score report is missing dirty_worktree'; return 1; }
+  [[ "$report_git_dirty" == "false" ]] ||
+    { jeryu_source_fail "score report dirty_worktree is ${report_git_dirty}, expected false"; return 1; }
+}

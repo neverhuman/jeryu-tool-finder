@@ -93,7 +93,11 @@ clear_output .jankurai/repo-score.md
 require_output_slot target/jankurai/evidence.json
 require_output_slot target/jankurai/repo-score.json
 require_output_slot target/jankurai/repo-score.md
-"$auditor_bin" audit . --full --mode advisory --policy agent/audit-policy.toml --json .jankurai/repo-score.json --md .jankurai/repo-score.md
+# Spawn the governed auditor under the same scrubbed replacement-blind Git
+# authority used for source checks. Ambient GIT_* must not select a foreign head.
+jeryu_with_scrubbed_git "$auditor_bin" audit . --full --mode advisory \
+  --policy agent/audit-policy.toml \
+  --json .jankurai/repo-score.json --md .jankurai/repo-score.md
 python3 - <<'PY'
 import json
 import sys
@@ -121,6 +125,8 @@ if errors:
     print("score check failed: " + "; ".join(errors), file=sys.stderr)
     sys.exit(1)
 PY
+jeryu_require_score_report_matches_source .jankurai/repo-score.json "$head_sha" ||
+  die 'score report Git identity does not match bound source'
 report_tmp="$(mktemp "$repo_root/target/jankurai/.repo-score.json.XXXXXX")"
 report_md_tmp="$(mktemp "$repo_root/target/jankurai/.repo-score.md.XXXXXX")"
 evidence_tmp=''
@@ -136,6 +142,8 @@ chmod 0600 "$report_tmp" "$report_md_tmp"
   die 'candidate score outputs are multiply linked'
 
 jeryu_source_verify "$head_sha" "$tree_sha" "$source_inputs_sha"
+jeryu_require_score_report_matches_source "$report_tmp" "$head_sha" ||
+  die 'candidate score report Git identity drifted'
 [[ "$(sha256sum -- "$auditor_bin" | awk '{print $1}')" == "$auditor_sha" &&
    "$($auditor_bin --version)" == "$auditor_version" ]] ||
   die 'governed auditor moved during scoring'

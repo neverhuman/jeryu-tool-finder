@@ -56,9 +56,13 @@ expect_rejected() {
 expect_rejected local JAIN_RELEASE_CI=0
 expect_rejected release JAIN_RELEASE_CI=1
 
-grep -Fq '"$auditor_bin" audit .' "$score"
+grep -Fq 'jeryu_with_scrubbed_git "$auditor_bin" audit' "$score"
 if grep -Fq '"$JANKURAI_BIN" audit .' "$score"; then
   printf 'score auditor hostile test failed: score still executes the legacy alias\n' >&2
+  exit 1
+fi
+if grep -Eq '^[[:space:]]*"\$auditor_bin"[[:space:]]+audit[[:space:]]' "$score"; then
+  printf 'score auditor hostile test failed: score still launches auditor under ambient Git\n' >&2
   exit 1
 fi
 
