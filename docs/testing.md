@@ -36,11 +36,12 @@ this repo has no pin-drift lane (see `agent/proof-lanes.toml`).
 - `just check` (`ops/ci/check.sh`) — the Rust finder passes fmt, warnings-denied
   locked/offline Clippy and tests; locked metadata proves both Intelligence
   crates resolve from immutable `split.1`; every shell entrypoint parses; and
-  the hostile local-dispatch test passes.
+  hostile dispatch, governed-auditor, and source-authority tests pass.
 - `just score` (`ops/ci/score.sh`) — runs the pinned jankurai audit over this
   exact clean head. It fails below the policy floor or on any cap/hard finding,
   then writes `target/jankurai/evidence.json` binding head, tree, policy, raw
-  report digest, and report fingerprints.
+  report digest, tracked-input digest, report fingerprints, and the exact
+  governed auditor binary/receipt identity.
 - `just security` (`ops/ci/security.sh`) — runs source/workflow/environment and
   locked metadata checks, cached Cargo audit, and SPDX generation. Its evidence
   binds the exact clean head/tree and subordinate artifact digests.
@@ -49,9 +50,10 @@ this repo has no pin-drift lane (see `agent/proof-lanes.toml`).
   `contracts/cli-help.txt`.
 - `just artifact-support` (`ops/ci/artifact-support.sh`) — requires current
   passing score evidence, clean Cargo-audit evidence, a valid generated SPDX
-  document, the tracked CLI contract, and a locked release build. Only then does
-  it publish `status=ready`; its hostile test rejects linked, substituted,
-  missing, or non-ready evidence.
+  document, the tracked CLI/version contracts, and a locked release build in a
+  new private target. Only then does it publish `status=ready`; its hostile test
+  rejects linked, preseeded, substituted, build-overridden, missing, or
+  non-ready evidence while preserving any prior valid pair.
 
 ## The dossier selftest
 

@@ -7,8 +7,9 @@ artifact-support receipt.
 
 ## Version source
 
-The version source is the `VERSION` file (the split tag, e.g.
-`jeryu-tool-finder-v5.1.0-split.0`). Release notes are recorded in
+The release tag source is `VERSION` (for example,
+`jeryu-tool-finder-v5.1.0-split.0`); its semver must equal the Cargo package
+version and the compiled CLI's exact `--version` output. Release notes are recorded in
 [`CHANGELOG.md`](../CHANGELOG.md). The sole family release authority is
 `../jeryu-release-ops/repos.manifest.toml`; release transport follows the
 protected local-forge lifecycle and immutable tag rules.
@@ -26,9 +27,9 @@ Before a release or split tag is promoted, confirm the full launch gate:
   (workflow lint), and the committed-`.env` guard all pass
 - validate `target/artifact-support/jeryu-tool-finder.json`: `status=ready`,
   exact head/tree, the single-link mode-0555
-  `target/artifact-support/jeryu-tool-finder` CLI checksum/size, `Cargo.lock`
-  and help-contract digests, and exact
-  score/security evidence digests
+  `target/artifact-support/jeryu-tool-finder` CLI checksum/size, VERSION/Cargo/
+  toolchain/help digests, exact governed Cargo/rustc identity, fresh-private-
+  target policy, and exact score/security evidence digests
 - confirm the security evidence says Cargo audit `clean` and SPDX `generated`;
   missing tools or incomplete evidence leave artifact support red
 - confirm **backups / reproducible inputs exist for rollback**: the prior split
@@ -53,12 +54,14 @@ checkout; it writes into the `jeryu-tool` registry and must keep
 ## Integrity & provenance
 
 The release coordinate is the immutable git commit at the split tag. The
-artifact-support receipt binds the release executable to that commit/tree and
-to the lockfile, CLI contract, score sidecar, and security sidecar. Those
-sidecars in turn bind the raw audit report, policy, Cargo-audit output, and SPDX
-document. Re-running `ops/ci/artifact-support.sh --validate-receipt` recomputes
-every digest and refuses dirty, symlinked, hard-linked, stale, or incomplete
-custody.
+artifact-support receipt binds the release executable to that commit/tree,
+physical tracked-input digest, release identity, governed build tools, locked
+inputs, CLI contract, score sidecar, and security sidecar. Those sidecars bind
+the same source digest; score also binds the exact verified auditor and its
+installation receipt where applicable. Re-running
+`ops/ci/artifact-support.sh --validate-receipt` recomputes every digest and
+refuses dirty, hidden-index, ambient-Git, symlinked, externally hard-linked,
+stale, overridden, or incomplete custody.
 
 ## Rollback
 

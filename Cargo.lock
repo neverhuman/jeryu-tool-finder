@@ -369,7 +369,7 @@ source = "git+http://127.0.0.1:8787/git/jeryu/jeryu-intelligence.git?tag=jeryu-i
 
 [[package]]
 name = "jeryu-tool-finder"
-version = "5.0.0"
+version = "5.1.0"
 dependencies = [
  "anyhow",
  "clap",

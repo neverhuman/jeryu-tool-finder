@@ -8,8 +8,11 @@ tag it carries is the release coordinate for the family.
 ### Changed (2026-08-16: product proof lanes)
 - Added a tracked Rust CLI help contract and standalone `contract-drift` lane.
 - Added exact-head score/security sidecars and an artifact-support receipt that
-  reports `ready` only for a digest-bound release CLI, lockfile, CLI contract,
-  clean Cargo audit, and valid SPDX document.
+  reports `ready` only for a digest-bound release CLI, truthful VERSION/Cargo/
+  `--version` identity, governed auditor and build tools, fresh private build,
+  clean Cargo audit, and valid SPDX document. Evidence now rejects ambient Git,
+  hidden-index, ignored-input, replacement/alternate-object, and build-override
+  substitution.
 - Removed ambient sibling path patches and pinned `jeryu-codegraph` to immutable
   local-forge `jeryu-intelligence-v5.0.0-split.1`.
 

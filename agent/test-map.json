@@ -31,24 +31,24 @@
       "purpose": "verify release notes stay routed through the score lane"
     },
     "Cargo.lock": {
-      "command": "just check",
-      "lane": "check",
-      "purpose": "verify the locked dependency graph still builds and tests green"
+      "command": "just",
+      "lane": "ci",
+      "purpose": "verify the locked graph builds and is bound into exact-head release evidence"
     },
     "Cargo.toml": {
-      "command": "just check && just score",
+      "command": "just",
       "lane": "ci",
-      "purpose": "verify the immutable engine pin resolves without an ambient path override"
+      "purpose": "verify the package version, immutable engine pin, and artifact receipt stay aligned"
     },
     "contracts/": {
-      "command": "just contract-drift",
-      "lane": "contract-drift",
-      "purpose": "verify the tracked public CLI help snapshot matches the compiled Rust binary"
+      "command": "just",
+      "lane": "ci",
+      "purpose": "verify the public CLI contract matches the binary and is bound into release evidence"
     },
     "contracts/**": {
-      "command": "just contract-drift",
-      "lane": "contract-drift",
-      "purpose": "verify the tracked public CLI help snapshot matches the compiled Rust binary"
+      "command": "just",
+      "lane": "ci",
+      "purpose": "verify the public CLI contract matches the binary and is bound into release evidence"
     },
     "Justfile": {
       "command": "just",
@@ -61,9 +61,9 @@
       "purpose": "verify root navigation remains current"
     },
     "VERSION": {
-      "command": "just score",
-      "lane": "score",
-      "purpose": "verify version source stays aligned with release evidence"
+      "command": "just",
+      "lane": "ci",
+      "purpose": "verify VERSION, Cargo semver, binary --version, and release evidence stay aligned"
     },
     "agent/": {
       "command": "just score",
@@ -131,9 +131,9 @@
       "purpose": "verify the pre-push hook delegates to the full required product gate"
     },
     "rust-toolchain.toml": {
-      "command": "just check",
-      "lane": "check",
-      "purpose": "verify the Rust finder builds clean (fmt/clippy/test) and the pipeline tests stay green"
+      "command": "just",
+      "lane": "ci",
+      "purpose": "verify the pinned toolchain builds clean and is digest-bound in release evidence"
     },
     "scripts/": {
       "command": "just check",
