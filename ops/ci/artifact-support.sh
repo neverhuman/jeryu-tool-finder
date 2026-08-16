@@ -6,6 +6,10 @@ cd "$repo_root"
 
 receipt_rel='target/artifact-support/jeryu-tool-finder.json'
 receipt="$repo_root/$receipt_rel"
+artifact_rel='target/artifact-support/jeryu-tool-finder'
+artifact="$repo_root/$artifact_rel"
+build_rel='target/release/jeryu-tool-finder'
+build="$repo_root/$build_rel"
 
 die() {
   printf 'artifact-support failed: %s\n' "$*" >&2
@@ -138,7 +142,7 @@ validate_cli_contract() {
   local stdout_tmp stderr_tmp
   stdout_tmp="$(mktemp "$repo_root/target/artifact-support/.help.stdout.XXXXXX")"
   stderr_tmp="$(mktemp "$repo_root/target/artifact-support/.help.stderr.XXXXXX")"
-  if ! target/release/jeryu-tool-finder --help > "$stdout_tmp" 2> "$stderr_tmp"; then
+  if ! "$artifact" --help > "$stdout_tmp" 2> "$stderr_tmp"; then
     rm -f -- "$stdout_tmp" "$stderr_tmp"
     die 'release CLI --help failed'
   fi
@@ -158,16 +162,17 @@ validate_receipt() {
   require_dir target
   require_dir target/artifact-support
   require_file "$receipt_rel"
-  require_file target/release/jeryu-tool-finder
+  require_file "$artifact_rel"
   require_file Cargo.lock
   require_file contracts/cli-help.txt
   validate_score "$head" "$tree"
   validate_security "$head" "$tree"
 
-  [[ -x target/release/jeryu-tool-finder ]] || die 'release CLI is not executable'
+  [[ "$(stat -c '%a' "$artifact")" == 555 ]] ||
+    die 'support artifact mode is not 0555'
   validate_cli_contract
-  binary_sha="$(sha_file target/release/jeryu-tool-finder)"
-  binary_size="$(stat -c '%s' target/release/jeryu-tool-finder)"
+  binary_sha="$(sha_file "$artifact")"
+  binary_size="$(stat -c '%s' "$artifact")"
   lock_sha="$(sha_file Cargo.lock)"
   contract_sha="$(sha_file contracts/cli-help.txt)"
 
@@ -181,7 +186,7 @@ validate_receipt() {
       .head == $head and .tree == $tree and
       .artifact == {
         kind: "rust-cli",
-        path: "target/release/jeryu-tool-finder",
+        path: "target/artifact-support/jeryu-tool-finder",
         sha256: $binary_sha,
         size: $binary_size
       } and
@@ -197,7 +202,14 @@ validate_receipt() {
 }
 
 produce_receipt() {
-  local head tree binary_sha binary_size lock_sha contract_sha receipt_tmp
+  local head tree build_sha binary_sha binary_size lock_sha contract_sha
+  local artifact_tmp='' receipt_tmp=''
+
+  cleanup_temps() {
+    [[ -z "$artifact_tmp" ]] || rm -f -- "$artifact_tmp"
+    [[ -z "$receipt_tmp" ]] || rm -f -- "$receipt_tmp"
+  }
+  trap cleanup_temps EXIT
 
   if [[ ! -e target ]]; then
     mkdir -- target
@@ -211,6 +223,10 @@ produce_receipt() {
   if [[ -e "$receipt" || -L "$receipt" ]]; then
     require_file "$receipt_rel"
     rm -- "$receipt"
+  fi
+  if [[ -e "$artifact" || -L "$artifact" ]]; then
+    require_file "$artifact_rel"
+    rm -- "$artifact"
   fi
 
   current_identity
@@ -227,11 +243,28 @@ produce_receipt() {
   [[ "$(git rev-parse --verify 'HEAD^{tree}')" == "$tree" ]] ||
     die 'tree moved during artifact build'
   require_clean_source
-  require_file target/release/jeryu-tool-finder
-  [[ -x target/release/jeryu-tool-finder ]] || die 'release CLI is not executable'
+  [[ -f "$build" && ! -L "$build" ]] || die "$build_rel is not a regular file"
+  [[ "$(realpath -e -- "$build")" == "$build" ]] || die "$build_rel escapes the repository"
+  [[ -x "$build" ]] || die 'release build output is not executable'
+  build_sha="$(sha_file "$build")"
 
-  binary_sha="$(sha_file target/release/jeryu-tool-finder)"
-  binary_size="$(stat -c '%s' target/release/jeryu-tool-finder)"
+  artifact_tmp="$(mktemp "$repo_root/target/artifact-support/.artifact.XXXXXX")"
+  cp --reflink=never -- "$build" "$artifact_tmp"
+  chmod 0555 "$artifact_tmp"
+  [[ "$(stat -c '%h' "$artifact_tmp")" -eq 1 ]] ||
+    die 'materialized support artifact is multiply linked'
+  [[ "$(sha_file "$artifact_tmp")" == "$build_sha" &&
+     "$(sha_file "$build")" == "$build_sha" ]] ||
+    die 'release build output moved during artifact materialization'
+  mv -- "$artifact_tmp" "$artifact"
+  artifact_tmp=''
+  require_file "$artifact_rel"
+  [[ "$(stat -c '%a' "$artifact")" == 555 ]] ||
+    die 'support artifact mode is not 0555'
+  validate_cli_contract
+
+  binary_sha="$(sha_file "$artifact")"
+  binary_size="$(stat -c '%s' "$artifact")"
   lock_sha="$(sha_file Cargo.lock)"
   contract_sha="$(sha_file contracts/cli-help.txt)"
   receipt_tmp="$(mktemp "$repo_root/target/artifact-support/.receipt.XXXXXX")"
@@ -256,7 +289,7 @@ produce_receipt() {
       tree: $tree,
       artifact: {
         kind: "rust-cli",
-        path: "target/release/jeryu-tool-finder",
+        path: "target/artifact-support/jeryu-tool-finder",
         sha256: $binary_sha,
         size: $binary_size
       },
@@ -271,6 +304,7 @@ produce_receipt() {
     }' > "$receipt_tmp"
   chmod 0600 "$receipt_tmp"
   mv -- "$receipt_tmp" "$receipt"
+  receipt_tmp=''
   trap - EXIT
 
   validate_receipt

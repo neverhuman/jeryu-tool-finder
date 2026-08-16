@@ -4,15 +4,18 @@ set -euo pipefail
 repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
 validator="$repo_root/ops/ci/artifact-support.sh"
 receipt="$repo_root/target/artifact-support/jeryu-tool-finder.json"
+artifact="$repo_root/target/artifact-support/jeryu-tool-finder"
 score="$repo_root/target/jankurai/evidence.json"
 security="$repo_root/target/security/evidence.json"
 test_dir="$repo_root/target/artifact-support"
 stderr_log="$test_dir/.hostile.stderr"
 receipt_saved=''
+artifact_saved=''
 security_saved=''
 
 cleanup() {
   rm -f -- "$test_dir/.receipt-hardlink" \
+    "$test_dir/.artifact-hardlink" \
     "$repo_root/target/jankurai/.evidence-hardlink" "$stderr_log"
   if [[ -L "$receipt" ]]; then
     rm -- "$receipt"
@@ -20,6 +23,13 @@ cleanup() {
   if [[ -n "$receipt_saved" && -f "$receipt_saved" ]]; then
     rm -f -- "$receipt"
     mv -- "$receipt_saved" "$receipt"
+  fi
+  if [[ -L "$artifact" ]]; then
+    rm -- "$artifact"
+  fi
+  if [[ -n "$artifact_saved" && -f "$artifact_saved" ]]; then
+    rm -f -- "$artifact"
+    mv -- "$artifact_saved" "$artifact"
   fi
   if [[ -n "$security_saved" && -f "$security_saved" ]]; then
     rm -f -- "$security"
@@ -40,6 +50,20 @@ expect_invalid() {
   fi
 }
 
+bash "$validator" --validate-receipt >/dev/null
+
+ln -- "$artifact" "$test_dir/.artifact-hardlink"
+expect_invalid 'multiply linked support artifact passed validation'
+rm -- "$test_dir/.artifact-hardlink"
+bash "$validator" --validate-receipt >/dev/null
+
+artifact_saved="$test_dir/.artifact-saved"
+mv -- "$artifact" "$artifact_saved"
+ln -s -- "$(basename "$artifact_saved")" "$artifact"
+expect_invalid 'symlinked support artifact passed validation'
+rm -- "$artifact"
+mv -- "$artifact_saved" "$artifact"
+artifact_saved=''
 bash "$validator" --validate-receipt >/dev/null
 
 ln -- "$receipt" "$test_dir/.receipt-hardlink"

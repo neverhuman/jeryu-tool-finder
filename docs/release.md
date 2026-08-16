@@ -25,8 +25,10 @@ Before a release or split tag is promoted, confirm the full launch gate:
 - confirm the **security** lane is green: gitleaks (secret scan), actionlint
   (workflow lint), and the committed-`.env` guard all pass
 - validate `target/artifact-support/jeryu-tool-finder.json`: `status=ready`,
-  exact head/tree, compiled CLI checksum/size, `Cargo.lock` and help-contract
-  digests, and exact score/security evidence digests
+  exact head/tree, the single-link mode-0555
+  `target/artifact-support/jeryu-tool-finder` CLI checksum/size, `Cargo.lock`
+  and help-contract digests, and exact
+  score/security evidence digests
 - confirm the security evidence says Cargo audit `clean` and SPDX `generated`;
   missing tools or incomplete evidence leave artifact support red
 - confirm **backups / reproducible inputs exist for rollback**: the prior split
