@@ -76,16 +76,6 @@ assert_dispatch() {
     fail "$lane delegated with the wrong root, argument count, or script"
 }
 
-assert_not_implemented() {
-  local lane="$1"
-
-  run_ci "$lane"
-  assert_status 2
-  [[ ! -s "$dispatch_log" ]] || fail "$lane delegated despite being absent"
-  grep -Fqx "CI lane not implemented: $lane" "$stderr_log" ||
-    fail "$lane did not report its absent proof lane"
-}
-
 assert_rejected() {
   run_ci "$@"
   assert_status 2
@@ -95,9 +85,8 @@ assert_rejected() {
 assert_dispatch required ops/ci/pr-ci.sh
 assert_dispatch security tools/security-lane.sh
 assert_dispatch score ops/ci/score.sh
-
-assert_not_implemented contract-drift
-assert_not_implemented artifact-support
+assert_dispatch contract-drift ops/ci/contract-drift.sh
+assert_dispatch artifact-support ops/ci/artifact-support.sh
 
 ci_dispatch_exit=37
 run_ci security

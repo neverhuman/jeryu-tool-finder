@@ -1,10 +1,13 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
 
-# Full local gate (no `fast`/pin lane — the jankurai pin is owned by jeryu-tool).
+# Full product gate (no `fast`/pin lane — the jankurai pin is owned by jeryu-tool).
 default:
   ./ops/ci/check.sh
   ./ops/ci/score.sh
   ./ops/ci/security.sh
+  ./ops/ci/contract-drift.sh
+  ./ops/ci/artifact-support.sh
+  ./tests/artifact_support_test.sh
 
 check:
   ./ops/ci/check.sh   # cargo fmt/clippy/test + shell syntax
@@ -14,6 +17,13 @@ score:
 
 security:
   ./ops/ci/security.sh # gitleaks actionlint env-file
+
+contract-drift:
+  ./ops/ci/contract-drift.sh # tracked CLI help contract
+
+artifact-support:
+  ./ops/ci/artifact-support.sh # exact-head CLI + score/security receipt
+  ./tests/artifact_support_test.sh
 
 # Dependency review (advisories, licenses, sources). Needs network; CI runs it.
 security-deps:

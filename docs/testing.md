@@ -1,8 +1,9 @@
 # Testing
 
-`jeryu-tool-finder` has no compiled product to unit-test, so its "tests" are the
-deterministic CI lanes over the scripts, the dossier selftest, and the audit.
-Every lane is a script under `ops/ci/`; CI and local invoke the **same** scripts.
+`jeryu-tool-finder` is a compiled Rust CLI with unit, property, and integration
+tests over scan → dossier → propose. Deterministic lane entrypoints live under
+`ops/ci/`; the protected local-Jeryu check and local commands invoke the same
+scripts.
 
 ## Local gate
 
@@ -15,17 +16,17 @@ just
 or, with no `just` installed, the same lanes directly:
 
 ```
-bash scripts/ci-local.sh required   # check → score → security, in CI order
+bash scripts/ci-local.sh required   # check → score → security → contract → artifact
 ```
 
 `scripts/ci-local.sh` accepts exactly one governed lane. `required`, `security`,
-and `score` delegate once to their canonical scripts. `contract-drift` and
-`artifact-support` are explicitly not implemented and exit 2 without delegation;
-all other inputs, including `fast` and `check`, are rejected the same way.
+`score`, `contract-drift`, and `artifact-support` each delegate exactly once to
+their canonical absolute script. Missing, extra, unknown, option-shaped, legacy,
+and injection-shaped inputs fail before delegation.
 
 Run `scripts/ci-doctor.sh` first to confirm your environment carries every tool
-the lanes depend on (`bash`, `python3`, `git`, `jankurai`; optional `just`,
-`gitleaks`, `actionlint`).
+the lanes depend on (`bash`, Cargo/Rust, `git`, `jq`, `jankurai`, `gitleaks`,
+`actionlint`, `cargo-audit`, and `syft`; `just` is an optional wrapper).
 
 ## Lanes
 
@@ -33,33 +34,37 @@ There is **no `fast` lane** here — the jankurai pin is owned by `jeryu-tool`, 
 this repo has no pin-drift lane (see `agent/proof-lanes.toml`).
 
 - `just check` (`ops/ci/check.sh`) — the Rust finder passes fmt, warnings-denied
-  Clippy, and tests; every shell entrypoint under `scripts/`, `tools/`, `tests/`,
-  and `ops/ci/` parses; and the hostile local-dispatch test passes. The dossier
-  fixture selftest rides the Rust test suite. This is the load-bearing test.
+  locked/offline Clippy and tests; locked metadata proves both Intelligence
+  crates resolve from immutable `split.1`; every shell entrypoint parses; and
+  the hostile local-dispatch test passes.
 - `just score` (`ops/ci/score.sh`) — runs the pinned jankurai audit over this
-  repo, writing `.jankurai/repo-score.json` (and a copy under `target/jankurai/`).
-  The lane fails if the score drops below the floor in `agent/audit-policy.toml`,
-  if any hard finding is present, or if any cap is applied.
-- `just security` (`ops/ci/security.sh`) — gitleaks (secret scan), actionlint
-  (workflow lint), and a committed-`.env` guard.
+  exact clean head. It fails below the policy floor or on any cap/hard finding,
+  then writes `target/jankurai/evidence.json` binding head, tree, policy, raw
+  report digest, and report fingerprints.
+- `just security` (`ops/ci/security.sh`) — runs source/workflow/environment and
+  locked metadata checks, cached Cargo audit, and SPDX generation. Its evidence
+  binds the exact clean head/tree and subordinate artifact digests.
+- `just contract-drift` (`ops/ci/contract-drift.sh`) — runs the Rust integration
+  test that compares compiled top-level help byte-for-byte with
+  `contracts/cli-help.txt`.
+- `just artifact-support` (`ops/ci/artifact-support.sh`) — requires current
+  passing score evidence, clean Cargo-audit evidence, a valid generated SPDX
+  document, the tracked CLI contract, and a locked release build. Only then does
+  it publish `status=ready`; its hostile test rejects linked, substituted,
+  missing, or non-ready evidence.
 
 ## The dossier selftest
 
-The dossier enrichment is the one piece of real logic in this repo, so it carries
-a hermetic, offline selftest. `scripts/dossier.py --selftest` loads
-`fixtures/sample-clusters.json`, runs the full enrichment, and asserts the dossier
-shape and the anticipated-LOC-saved math without touching the codegraph engine or
-the network. `ops/ci/check.sh` runs it on every gate, so a change to the dossier
-schema that breaks the contract fails CI immediately.
+The Rust suite carries hermetic dossier enrichment and end-to-end pipeline
+fixtures. It asserts dossier shape, LOC-saved math, proposal idempotency, comment
+preservation, and dry-run behavior without a network dependency.
 
 ## CI parity & repair evidence
 
-`.github/workflows/ci.yml` runs check → score → security — the identical
-`ops/ci/*.sh` scripts the local gate and `ops/git-hooks/pre-push` call, so local
-and hosted CI cannot diverge. When the score lane fails, the next agent reads the
-structured evidence in `.jankurai/repo-score.json` (`caps_applied`, `findings`
-with `agent_fix` and `rerun_command`, and `agent_fix_queue`) to find exactly
-which path to repair and which lane to rerun.
+Release authority is the protected 100%-local Jeryu
+`jeryu-tool-finder/required` check. `.github/workflows/ci.yml` is only a checked,
+non-authoritative parity artifact. The pre-push hook delegates to `required`, so
+it cannot silently omit the product contract or artifact lane.
 
 The scripts surface failures as non-zero exits with a one-line cause on stderr
 (missing tool, failed selftest, committed `.env`); the audit writes its full,
@@ -72,6 +77,6 @@ proof. A failed lane prints its cause on stderr and exits non-zero; the score
 lane additionally writes a structured receipt to `.jankurai/repo-score.json`,
 where each finding carries `path`, `agent_fix`, and `rerun_command` (and the
 `agent_fix_queue` orders them). The repair loop is therefore: read the receipt,
-fix the named `path`, and rerun the named lane (for this repo, `just check`,
-`just score`, or `just security`) until the finding clears. See
+fix the named `path`, and rerun the mapped command in `agent/test-map.json`
+until the finding clears. See
 `agent/JANKURAI_STANDARD.md` for the repair-receipt contract.

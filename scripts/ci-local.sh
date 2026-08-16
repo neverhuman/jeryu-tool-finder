@@ -18,9 +18,11 @@ case "$1" in
   score)
     lane_script='ops/ci/score.sh'
     ;;
-  contract-drift | artifact-support)
-    printf 'CI lane not implemented: %s\n' "$1" >&2
-    exit 2
+  contract-drift)
+    lane_script='ops/ci/contract-drift.sh'
+    ;;
+  artifact-support)
+    lane_script='ops/ci/artifact-support.sh'
     ;;
   *)
     printf 'unsupported CI lane: %s\n' "$1" >&2

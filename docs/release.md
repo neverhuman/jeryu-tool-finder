@@ -1,32 +1,34 @@
 # Release
 
-`jeryu-tool-finder` ships **no binary of its own** — it is pure Python scripts
-plus docs. A "release" here is a split tag that pins the discovery scripts and
-the dossier/proposal contract the rest of the family consumes.
+`jeryu-tool-finder` ships one Rust CLI. A release binds that executable, its
+public help contract, exact source/tree, immutable Intelligence dependency,
+score evidence, security evidence, and lockfile in a deterministic
+artifact-support receipt.
 
 ## Version source
 
 The version source is the `VERSION` file (the split tag, e.g.
 `jeryu-tool-finder-v5.1.0-split.0`). Release notes are recorded in
-[`CHANGELOG.md`](../CHANGELOG.md). The signed release artifacts for the whole
-family are published by `neverhuman/jeryu-deploy`; this repo contributes only its
-source at the pinned tag.
+[`CHANGELOG.md`](../CHANGELOG.md). The sole family release authority is
+`../jeryu-release-ops/repos.manifest.toml`; release transport follows the
+protected local-forge lifecycle and immutable tag rules.
 
 ## Release gate
 
 Before a release or split tag is promoted, confirm the full launch gate:
 
-- run the full gate locally: `bash scripts/ci-local.sh required` (or `just`), which runs
-  `ops/ci/check.sh` (script compile + `dossier.py --selftest`), `ops/ci/score.sh`
-  (the pinned jankurai audit), and `ops/ci/security.sh`
-- confirm the same lanes are green in hosted CI (`.github/workflows/ci.yml` runs
-  check → score → security, at parity with the local gate)
+- run `bash scripts/ci-local.sh required` (or `just`): locked Rust check, score,
+  security, CLI contract drift, and artifact support, in that order
+- require the protected local-Jeryu `jeryu-tool-finder/required` check at the
+  exact candidate head; the GitHub workflow is not release authority
 - confirm `scripts/ci-doctor.sh` reports all required tooling present
 - confirm the **security** lane is green: gitleaks (secret scan), actionlint
   (workflow lint), and the committed-`.env` guard all pass
-- confirm **checksum, provenance, and SBOM** policy: there is no compiled
-  artifact here, so the provenance is the immutable tagged source plus the
-  fingerprinted audit evidence in `target/jankurai/repo-score.json`
+- validate `target/artifact-support/jeryu-tool-finder.json`: `status=ready`,
+  exact head/tree, compiled CLI checksum/size, `Cargo.lock` and help-contract
+  digests, and exact score/security evidence digests
+- confirm the security evidence says Cargo audit `clean` and SPDX `generated`;
+  missing tools or incomplete evidence leave artifact support red
 - confirm **backups / reproducible inputs exist for rollback**: the prior split
   tag is the backup; `dossiers/` is regenerable from the engine, never a backup
   dependency
@@ -40,22 +42,21 @@ Before a release or split tag is promoted, confirm the full launch gate:
 
 ## Release automation & command policy
 
-The release gate is script-driven and deterministic: the lanes in `ops/ci/` are
-the automation. CI (`.github/workflows/ci.yml`) and the local runner
-(`scripts/ci-local.sh`) and the pre-push hook (`ops/git-hooks/pre-push`) all call
-the **same** `ops/ci/*.sh` scripts, so a release can never pass CI while failing
-locally. No release step mutates state outside the working tree except
-`propose.py`, which writes into the sibling `jeryu-tool` registry and must keep
+The release gate is script-driven and deterministic. The protected local gate,
+local runner, Just recipes, and pre-push hook compose the same repository-owned
+lanes. The `propose` command is the one product operation that mutates a sibling
+checkout; it writes into the `jeryu-tool` registry and must keep
 `jeryu-tool`'s `ops/registry_summary.py --check` green.
 
 ## Integrity & provenance
 
-The release coordinate is the immutable git commit at the split tag. There is no
-compiled artifact to checksum or SBOM here; provenance is the tagged source plus
-the audit evidence the score lane writes to `target/jankurai/repo-score.json`
-(fingerprinted: `report_fingerprint`, `input_fingerprint`, `policy_fingerprint`).
-The pinned auditor itself is governed by `jeryu-tool`'s `tool-manifest.toml`; this
-repo verifies it via `jankurai --version` in `ops/ci/lib.sh` before scoring.
+The release coordinate is the immutable git commit at the split tag. The
+artifact-support receipt binds the release executable to that commit/tree and
+to the lockfile, CLI contract, score sidecar, and security sidecar. Those
+sidecars in turn bind the raw audit report, policy, Cargo-audit output, and SPDX
+document. Re-running `ops/ci/artifact-support.sh --validate-receipt` recomputes
+every digest and refuses dirty, symlinked, hard-linked, stale, or incomplete
+custody.
 
 ## Rollback
 

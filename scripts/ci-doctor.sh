@@ -23,10 +23,10 @@ export JERYU_JANKURAI_BUILD_MODE="cargo-install-locked-offline-path-v1"
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/ops/ci/lib.sh"
 require_jankurai
 
-# Required: the lanes (check/score/security) cannot run without these.
-required=(bash python3 git cargo jankurai)
-# Optional: security.sh runs these when present, and `just` is the lane wrapper.
-optional=(just gitleaks actionlint)
+# Required: the full product gate fails closed without these.
+required=(bash python3 git cargo jq jankurai gitleaks actionlint cargo-audit syft)
+# Optional: `just` is a convenience wrapper around the canonical scripts.
+optional=(just)
 
 missing=0
 echo "ci-doctor: required tools"

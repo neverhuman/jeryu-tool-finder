@@ -5,6 +5,14 @@ tag it carries is the release coordinate for the family.
 
 ## Unreleased
 
+### Changed (2026-08-16: product proof lanes)
+- Added a tracked Rust CLI help contract and standalone `contract-drift` lane.
+- Added exact-head score/security sidecars and an artifact-support receipt that
+  reports `ready` only for a digest-bound release CLI, lockfile, CLI contract,
+  clean Cargo audit, and valid SPDX document.
+- Removed ambient sibling path patches and pinned `jeryu-codegraph` to immutable
+  local-forge `jeryu-intelligence-v5.0.0-split.1`.
+
 ### Changed (2026-06-12: all-Rust rewrite, system-wide scope)
 - The whole pipeline is now a single Rust binary (`src/`,
   `cargo run -- scan|dossier|propose|summary`); the Python scripts are gone.

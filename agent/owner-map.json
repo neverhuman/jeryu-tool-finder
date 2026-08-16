@@ -9,6 +9,8 @@
     "CHANGELOG.md": "release",
     "Cargo.lock": "finder",
     "Cargo.toml": "finder",
+    "contracts/": "finder",
+    "contracts/**": "finder",
     "Justfile": "ops",
     "README.md": "docs",
     "VERSION": "release",

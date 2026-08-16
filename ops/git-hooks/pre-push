@@ -4,6 +4,4 @@
 # There is no `fast` lane in this repo (the jankurai pin lives in jeryu-tool).
 set -euo pipefail
 
-bash ops/ci/check.sh
-bash ops/ci/score.sh
-bash ops/ci/security.sh
+bash scripts/ci-local.sh required

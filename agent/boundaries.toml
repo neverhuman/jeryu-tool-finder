@@ -4,17 +4,15 @@ profile = "public-portal"
 required_check = "jeryu-tool-finder/required"
 
 [split]
-# The engine (jeryu-codegraph) is consumed by pinned public git tag; the
-# [patch] section in Cargo.toml redirects to the local split checkout for
-# family development, mirroring jeryu-deploy's wiring.
+# The engine (jeryu-codegraph) is consumed only from the immutable local-forge
+# Intelligence tag. Builds never read an ambient sibling checkout.
 cross_repo_dependency_policy = "pinned-public-git-tags"
-local_path_patches = true
+local_path_patches = false
 
 cargo_members = [
   "jeryu-tool-finder",
 ]
 
-[python]
-# ops/ is the CI gate (shell + the score lane's python helper); scripts/ keeps
-# the gate wrapper shells (ci-doctor, ci-local). Discovery is all Rust (src/).
-allowed_non_product_paths = ["scripts/", "ops/"]
+[rust]
+binary = "jeryu-tool-finder"
+contract = "contracts/cli-help.txt"

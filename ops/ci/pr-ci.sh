@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 # Canonical local PR gate for jeryu-tool-finder. split-host-ci prefers this
 # script and posts the `jeryu-tool-finder/required` check-run from its exit
-# status; .github/workflows/ci.yml runs the same lanes on the GitHub mirror so
-# the two surfaces cannot diverge.
+# status. This script is the product-gate composition authority.
 set -euo pipefail
 
 # BEGIN GENERATED JANKURAI PIN — DO NOT EDIT
@@ -53,4 +52,7 @@ echo "[pr-ci] (jobs=$JOBS) standard lanes" >&2
 bash ops/ci/check.sh
 bash ops/ci/score.sh
 bash tools/security-lane.sh
+bash ops/ci/contract-drift.sh
+bash ops/ci/artifact-support.sh
+bash tests/artifact_support_test.sh
 echo "[pr-ci] jeryu-tool-finder OK" >&2
