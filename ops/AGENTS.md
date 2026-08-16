@@ -21,5 +21,6 @@ This cell owns the **CI gate** and the **local-parity surface** for
 
 ## Proof lane
 - Edits under `ops/` are re-verified by `just check` (and the audit via
-  `just score`). Run `bash scripts/ci-local.sh` before pushing; `scripts/ci-doctor.sh`
-  confirms the required tooling is present. See `../docs/testing.md`.
+  `just score`). Run `bash scripts/ci-local.sh required` before pushing;
+  `scripts/ci-doctor.sh` confirms the required tooling is present. See
+  `../docs/testing.md`.

@@ -15,8 +15,13 @@ just
 or, with no `just` installed, the same lanes directly:
 
 ```
-bash scripts/ci-local.sh   # check → score → security, in CI order
+bash scripts/ci-local.sh required   # check → score → security, in CI order
 ```
+
+`scripts/ci-local.sh` accepts exactly one governed lane. `required`, `security`,
+and `score` delegate once to their canonical scripts. `contract-drift` and
+`artifact-support` are explicitly not implemented and exit 2 without delegation;
+all other inputs, including `fast` and `check`, are rejected the same way.
 
 Run `scripts/ci-doctor.sh` first to confirm your environment carries every tool
 the lanes depend on (`bash`, `python3`, `git`, `jankurai`; optional `just`,
@@ -27,9 +32,10 @@ the lanes depend on (`bash`, `python3`, `git`, `jankurai`; optional `just`,
 There is **no `fast` lane** here — the jankurai pin is owned by `jeryu-tool`, so
 this repo has no pin-drift lane (see `agent/proof-lanes.toml`).
 
-- `just check` (`ops/ci/check.sh`) — every `scripts/*.py` byte-compiles, every
-  shell entrypoint under `ops/` parses, and `scripts/dossier.py --selftest`
-  passes against `fixtures/sample-clusters.json`. This is the load-bearing test.
+- `just check` (`ops/ci/check.sh`) — the Rust finder passes fmt, warnings-denied
+  Clippy, and tests; every shell entrypoint under `scripts/`, `tools/`, `tests/`,
+  and `ops/ci/` parses; and the hostile local-dispatch test passes. The dossier
+  fixture selftest rides the Rust test suite. This is the load-bearing test.
 - `just score` (`ops/ci/score.sh`) — runs the pinned jankurai audit over this
   repo, writing `.jankurai/repo-score.json` (and a copy under `target/jankurai/`).
   The lane fails if the score drops below the floor in `agent/audit-policy.toml`,

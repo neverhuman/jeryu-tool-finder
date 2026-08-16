@@ -16,7 +16,7 @@ source at the pinned tag.
 
 Before a release or split tag is promoted, confirm the full launch gate:
 
-- run the full gate locally: `bash scripts/ci-local.sh` (or `just`), which runs
+- run the full gate locally: `bash scripts/ci-local.sh required` (or `just`), which runs
   `ops/ci/check.sh` (script compile + `dossier.py --selftest`), `ops/ci/score.sh`
   (the pinned jankurai audit), and `ops/ci/security.sh`
 - confirm the same lanes are green in hosted CI (`.github/workflows/ci.yml` runs
@@ -60,7 +60,7 @@ repo verifies it via `jankurai --version` in `ops/ci/lib.sh` before scoring.
 ## Rollback
 
 Rollback restores the previous split tag: check out the prior `VERSION` commit,
-re-run `bash scripts/ci-local.sh` to confirm the older gate is still green, and
+re-run `bash scripts/ci-local.sh required` to confirm the older gate is still green, and
 re-tag if a repair release is needed. Do **not** overwrite a published split tag —
 publish a new repair tag instead. `dossiers/` is a regenerated zone, so no
 release rollback ever needs to touch it; re-run `just scan && just dossier` to

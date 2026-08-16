@@ -45,7 +45,7 @@ family pin graph is unchanged — it is pure scripts + docs.
 bash scripts/ci-doctor.sh   # confirm required tooling (python3, git, jankurai)
 just                        # the gate: check + score + security
 # or without `just`:
-bash scripts/ci-local.sh    # same lanes CI runs, in CI order
+bash scripts/ci-local.sh required # canonical PR gate: check → score → security
 ```
 
 Wire the local gate to run before every push:

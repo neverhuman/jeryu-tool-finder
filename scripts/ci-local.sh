@@ -1,8 +1,34 @@
 #!/usr/bin/env bash
-# Local entry point: run the same CI lanes the hosted workflow runs, in order.
-# There is no `fast`/pin lane in this repo — the jankurai pin is owned by
-# jeryu-tool — so the gate is check + score + security (mirrors .github/workflows/ci.yml).
 set -euo pipefail
-bash ops/ci/check.sh
-bash ops/ci/score.sh
-bash ops/ci/security.sh
+
+usage='usage: ci-local.sh {required|security|score|contract-drift|artifact-support}'
+
+if [[ "$#" -ne 1 ]]; then
+  printf '%s\n' "$usage" >&2
+  exit 2
+fi
+
+case "$1" in
+  required)
+    lane_script='ops/ci/pr-ci.sh'
+    ;;
+  security)
+    lane_script='tools/security-lane.sh'
+    ;;
+  score)
+    lane_script='ops/ci/score.sh'
+    ;;
+  contract-drift | artifact-support)
+    printf 'CI lane not implemented: %s\n' "$1" >&2
+    exit 2
+    ;;
+  *)
+    printf 'unsupported CI lane: %s\n' "$1" >&2
+    exit 2
+    ;;
+esac
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd -P)"
+cd "$repo_root"
+
+exec bash "$repo_root/$lane_script"

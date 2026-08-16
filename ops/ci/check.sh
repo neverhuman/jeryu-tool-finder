@@ -4,11 +4,13 @@
 set -euo pipefail
 source ops/ci/lib.sh
 
-# Shell entrypoints must parse.
-for script in ops/*.sh ops/ci/*.sh; do
+# Shell entrypoints and their dispatch test must parse.
+for script in scripts/*.sh tools/*.sh tests/*.sh ops/*.sh ops/ci/*.sh; do
   [[ -e "$script" ]] || continue
   bash -n "$script"
 done
+
+bash tests/ci_local_dispatch_test.sh
 
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
