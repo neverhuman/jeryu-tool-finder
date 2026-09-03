@@ -68,7 +68,8 @@ fi
 # License, ban, and source policy is mandatory and does not fetch. Advisory
 # freshness is enforced separately by the fail-closed cached cargo-audit step.
 cargo_deny_bin="$(command -v cargo-deny)"
-jeryu_with_scrubbed_git "$cargo_deny_bin" check bans licenses sources --disable-fetch
+jeryu_with_scrubbed_git /usr/bin/env CARGO="$cargo_bin" \
+  "$cargo_deny_bin" check bans licenses sources --disable-fetch
 cargo_audit_status="skipped-no-lock"
 if [[ -f Cargo.lock ]]; then
   cargo_audit_bin="$(command -v cargo-audit)"
