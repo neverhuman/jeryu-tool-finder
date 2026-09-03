@@ -386,7 +386,7 @@ validate_security() {
       .source == {tracked_inputs_sha256: $source_sha} and
       .checks == [
         "gitleaks-detect", "actionlint", "env-file", "cargo-metadata",
-        "optional-cargo-deny", "cargo-audit-no-fetch", "syft-sbom"
+        "cargo-deny-locked-policy", "cargo-audit-no-fetch", "syft-sbom"
       ] and
       .cargo_audit == "clean" and .sbom == "generated" and
       .artifacts.cargo_audit == {

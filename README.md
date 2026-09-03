@@ -34,10 +34,11 @@ forge golden box →  shows the payoff on /repos
 
 ## Immutable library boundary
 
-The CLI links `jeryu-codegraph` as a Rust library. `Cargo.toml` pins the
-canonical local Jeryu forge tag `jeryu-intelligence-v5.0.0-split.1`, and
-`Cargo.lock` binds its exact commit. No relative Cargo patch or ambient sibling
-checkout participates in a normal, test, or release build.
+The CLI links `jeryu-codegraph` as a Rust library. `Cargo.toml` preserves the
+immutable source coordinate `jeryu-intelligence-v5.0.0-split.1`, `Cargo.lock`
+binds its exact commit, and governed Git/Cargo configuration transports that
+coordinate through `git.neverhuman.org`. No relative Cargo patch or ambient
+sibling checkout participates in a normal, test, or release build.
 
 ## Quick start
 

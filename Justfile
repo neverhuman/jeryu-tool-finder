@@ -25,9 +25,9 @@ artifact-support:
   ./ops/ci/artifact-support.sh # exact-head CLI + score/security receipt
   ./tests/artifact_support_test.sh
 
-# Dependency review (advisories, licenses, sources). Needs network; CI runs it.
+# Deterministic dependency policy subset; advisories are enforced by security.
 security-deps:
-  JERYU_SECURITY_NETWORK=1 cargo deny check
+  cargo deny check bans licenses sources --disable-fetch
 
 build:
   cargo build --release

@@ -11,7 +11,7 @@ This cell owns the **CI gate** and the **local-parity surface** for
 - `ops/git-hooks/pre-push` — the mandatory local gate (wire once with
   `git config core.hooksPath ops/git-hooks`).
 - `.github/workflows/ci.yml` — a non-authoritative parity artifact. Protected
-  local-Jeryu `jeryu-tool-finder/required` remains release authority.
+  hosted `jeryu-tool-finder/required` remains release authority.
 
 ## Forbidden
 - No `fast`/pin-drift lane here — the jankurai pin is owned by `jeryu-tool`, not

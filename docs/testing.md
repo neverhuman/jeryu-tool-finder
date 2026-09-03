@@ -2,7 +2,7 @@
 
 `jeryu-tool-finder` is a compiled Rust CLI with unit, property, and integration
 tests over scan → dossier → propose. Deterministic lane entrypoints live under
-`ops/ci/`; the protected local-Jeryu check and local commands invoke the same
+`ops/ci/`; the protected hosted check and local commands invoke the same
 scripts.
 
 ## Local gate
@@ -26,7 +26,8 @@ and injection-shaped inputs fail before delegation.
 
 Run `scripts/ci-doctor.sh` first to confirm your environment carries every tool
 the lanes depend on (`bash`, Cargo/Rust, `git`, `jq`, `jankurai`, `gitleaks`,
-`actionlint`, `cargo-audit`, and `syft`; `just` is an optional wrapper).
+`actionlint`, `cargo-audit`, `cargo-deny`, `shellcheck`, and `syft`; `just` is an
+optional wrapper).
 
 ## Lanes
 
@@ -35,16 +36,18 @@ this repo has no pin-drift lane (see `agent/proof-lanes.toml`).
 
 - `just check` (`ops/ci/check.sh`) — the Rust finder passes fmt, warnings-denied
   locked/offline Clippy and tests; locked metadata proves both Intelligence
-  crates resolve from immutable `split.1`; every shell entrypoint parses; and
-  hostile dispatch, governed-auditor, and source-authority tests pass.
+  crates resolve from immutable `split.1`; every shell entrypoint parses and
+  passes ShellCheck; and hostile dispatch, governed-auditor, and
+  source-authority tests pass.
 - `just score` (`ops/ci/score.sh`) — runs the pinned jankurai audit over this
   exact clean head. It fails below the policy floor or on any cap/hard finding,
   then writes `target/jankurai/evidence.json` binding head, tree, policy, raw
   report digest, tracked-input digest, report fingerprints, and the exact
   governed auditor binary/receipt identity.
-- `just security` (`ops/ci/security.sh`) — runs source/workflow/environment and
-  locked metadata checks, cached Cargo audit, and SPDX generation. Its evidence
-  binds the exact clean head/tree and subordinate artifact digests.
+- `just security` (`ops/ci/security.sh`) — runs source/workflow/environment,
+  locked metadata, mandatory Cargo license/ban/source policy, cached Cargo
+  audit, and SPDX generation. Its evidence binds the exact clean head/tree and
+  subordinate artifact digests; a missing scanner or malformed output fails.
 - `just contract-drift` (`ops/ci/contract-drift.sh`) — runs the Rust integration
   test that compares compiled top-level help byte-for-byte with
   `contracts/cli-help.txt`.
@@ -63,7 +66,7 @@ preservation, and dry-run behavior without a network dependency.
 
 ## CI parity & repair evidence
 
-Release authority is the protected 100%-local Jeryu
+Release authority is the protected hosted Jeryu
 `jeryu-tool-finder/required` check. `.github/workflows/ci.yml` is only a checked,
 non-authoritative parity artifact. The pre-push hook delegates to `required`, so
 it cannot silently omit the product contract or artifact lane.

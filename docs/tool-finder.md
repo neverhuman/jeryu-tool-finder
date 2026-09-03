@@ -14,8 +14,9 @@ index** so a window seen in more than one repo becomes a single cluster with
 
 This repo is the **operator surface**: one Rust binary drives the linked engine
 across the family, renders dossiers, and files proposals. The engine dependency
-resolves only from immutable local-forge Intelligence `split.1`; the lockfile
-binds its exact commit and no ambient sibling checkout is consulted.
+preserves immutable Intelligence `split.1` as its Cargo source identity; the
+lockfile binds its exact commit, governed Git rewrites transport it through
+`git.neverhuman.org`, and no ambient sibling checkout is consulted.
 
 ## Pipeline
 
@@ -61,5 +62,7 @@ rollout. Treat the proposal as a draft, not the final migration set.
 Keeping discovery here gives the family a dedicated, evolvable operator crate
 (more search modalities, richer dossiers, scheduled scans) without adding a
 second clustering implementation. The explicit version edge is the immutable
-local-forge `jeryu-codegraph` tag in `Cargo.toml`; unpublished engine changes
-must complete their own reviewed tag lifecycle before this pin moves.
+`jeryu-codegraph` source coordinate in `Cargo.toml`; unpublished engine changes
+must complete their own reviewed tag lifecycle before this pin moves. Changing
+the URL spelling without a deliberate repin is forbidden because Cargo would
+treat it as a second crate identity.

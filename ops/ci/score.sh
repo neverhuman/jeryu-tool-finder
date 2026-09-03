@@ -98,33 +98,27 @@ require_output_slot target/jankurai/repo-score.md
 jeryu_with_scrubbed_git "$auditor_bin" audit . --full --mode advisory \
   --policy agent/audit-policy.toml \
   --json .jankurai/repo-score.json --md .jankurai/repo-score.md
-python3 - <<'PY'
-import json
-import sys
-from pathlib import Path
-report = json.loads(Path(".jankurai/repo-score.json").read_text())
-score = int(report.get("score") or 0)
-floor = 85
-try:
-    import tomllib
-    floor = int(tomllib.loads(Path("agent/audit-policy.toml").read_text()).get("minimum_score", 85))
-except Exception:
-    pass
-caps = report.get("caps_applied") or report.get("caps") or []
-decision = report.get("decision") if isinstance(report.get("decision"), dict) else {}
-hard = decision.get("hard_findings", report.get("hard_findings", 0))
-hard_count = len(hard) if isinstance(hard, list) else int(hard or 0)
-errors = []
-if score < floor:
-    errors.append(f"score {score} is below {floor}")
-if caps:
-    errors.append(f"caps present: {', '.join(str(item) for item in caps)}")
-if hard_count:
-    errors.append(f"hard findings present: {hard_count}")
-if errors:
-    print("score check failed: " + "; ".join(errors), file=sys.stderr)
-    sys.exit(1)
-PY
+minimum_score="$(awk -F= '/^[[:space:]]*minimum_score[[:space:]]*=/ {
+  gsub(/[[:space:]]/, "", $2); print $2; exit
+}' agent/audit-policy.toml)"
+[[ "$minimum_score" =~ ^[0-9]+$ ]] || die 'minimum_score is not an integer'
+score_value="$(jq -er '.score | numbers' .jankurai/repo-score.json)" ||
+  die 'score report has no numeric score'
+caps_count="$(jq -er '
+  (.caps_applied // .caps // [])
+  | if type == "array" then length else error("caps are not an array") end
+' .jankurai/repo-score.json)" || die 'score report has malformed caps'
+hard_count="$(jq -er '
+  (if ((.decision // null) | type) == "object" and (.decision | has("hard_findings"))
+   then .decision.hard_findings else (.hard_findings // 0) end)
+  | if type == "array" then length
+    elif type == "number" then .
+    else error("hard findings are neither an array nor a number") end
+' .jankurai/repo-score.json)" || die 'score report has malformed hard findings'
+(( score_value >= minimum_score )) ||
+  die "score ${score_value} is below ${minimum_score}"
+(( caps_count == 0 )) || die "caps present: ${caps_count}"
+(( hard_count == 0 )) || die "hard findings present: ${hard_count}"
 jeryu_require_score_report_matches_source .jankurai/repo-score.json "$head_sha" ||
   die 'score report Git identity does not match bound source'
 report_tmp="$(mktemp "$repo_root/target/jankurai/.repo-score.json.XXXXXX")"
@@ -157,10 +151,6 @@ report="$report_tmp"
   die 'score report lacks regular single-link custody'
 report_sha="$(sha256sum "$report" | awk '{print $1}')"
 policy_sha="$(sha256sum agent/audit-policy.toml | awk '{print $1}')"
-minimum_score="$(awk -F= '/^[[:space:]]*minimum_score[[:space:]]*=/ {
-  gsub(/[[:space:]]/, "", $2); print $2; exit
-}' agent/audit-policy.toml)"
-[[ "$minimum_score" =~ ^[0-9]+$ ]] || die 'minimum_score is not an integer'
 score="$(jq -er '.score | numbers' "$report")"
 raw_score="$(jq -er '.raw_score | numbers' "$report")"
 report_fingerprint="$(jq -er '.report_fingerprint | select(test("^sha256:[0-9a-f]{64}$"))' "$report")"

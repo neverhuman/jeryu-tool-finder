@@ -6,7 +6,7 @@ Profile: `public-portal` (single Rust discovery CLI)
 
 Required local commands are `just check`, `just score`, `just security`,
 `just contract-drift`, and `just artifact-support`. `just` (no recipe) runs the
-full product gate in one command. Protected local-forge CI uses the same scripts.
+full product gate in one command. Protected hosted CI uses the same scripts.
 
 There is **no `fast` lane** here: the jankurai pin is the single source of truth
 in `jeryu-tool`'s `tool-manifest.toml`, not in this repo. The separate Cargo

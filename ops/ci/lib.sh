@@ -57,7 +57,7 @@ require_jankurai() {
   local -a receipt_candidates=()
   if [[ "${JAIN_RELEASE_CI:-0}" == "1" ]]; then
     mode=release-broker
-    resolved="$(command -v jankurai 2>/dev/null || true)"
+    resolved="$(type -P -- jankurai 2>/dev/null || true)"
     if [[ "${resolved}" != "${expected_broker}" ]]; then
       printf 'release broker Jankurai path mismatch: expected %s, resolved %s\n' \
         "${expected_broker}" "${resolved:-missing}" >&2
@@ -81,11 +81,16 @@ require_jankurai() {
     printf 'release broker Jankurai custody mismatch: expected mode 0555 and one link at %s\n' \
       "${bin}" >&2
     exit 1
+  elif [[ "${mode}" != "release-broker" &&
+          "$(stat -c '%h' -- "${bin}" 2>/dev/null || true)" != "1" ]]; then
+    printf 'governed jankurai custody mismatch: expected one link at %s\n' \
+      "${bin}" >&2
+    exit 1
   fi
   if [[ "${mode}" != "release-broker" ]]; then
     bin_dir="$(dirname "${bin}")"
     export PATH="${bin_dir}:${PATH}"
-    resolved="$(command -v jankurai 2>/dev/null || true)"
+    resolved="$(type -P -- jankurai 2>/dev/null || true)"
     if [[ "${resolved}" != "${bin}" ]]; then
       printf 'governed jankurai shadowed: expected %s, resolved %s\n' \
         "${bin}" "${resolved:-missing}" >&2
@@ -214,4 +219,9 @@ require_jankurai() {
     exit 1
   fi
   export JANKURAI_NO_UPDATE_CHECK=1 GIT_TERMINAL_PROMPT=0
+}
+
+jankurai() {
+  require_jankurai || return 1
+  command "${JERYU_GOVERNED_JANKURAI_BIN}" "$@"
 }

@@ -3,15 +3,16 @@
 # The engine (scanning, overlap merging, pattern families, enrichment) lives in
 # jeryu-codegraph and is consumed AS A LIBRARY: no subprocess dance, one
 # implementation shared with the live API server. Every build consumes the
-# immutable local-forge tag; no ambient sibling checkout participates in
-# dependency resolution.
+# immutable source-identity tag; governed Git rewrites carry that stable Cargo
+# coordinate over the hosted forge. No ambient sibling checkout participates
+# in dependency resolution.
 
 [package]
 name = "jeryu-tool-finder"
 version = "5.1.0"
 edition = "2024"
 license = "Apache-2.0"
-repository = "https://github.com/neverhuman/jeryu-tool-finder"
+repository = "https://git.neverhuman.org/git/jeryu/jeryu-tool-finder.git"
 rust-version = "1.95"
 description = "Cross-repo duplicate-code discovery: scan, dossier, and propose shared tools"
 

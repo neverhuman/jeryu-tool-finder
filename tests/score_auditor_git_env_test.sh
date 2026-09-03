@@ -93,27 +93,20 @@ auditor_bin="$JERYU_GOVERNED_JANKURAI_BIN"
 
 assert_report_bound() {
   local mode="$1" report_path="$2"
-  python3 - "$report_path" "$bound_head" "$foreign_short" "$mode" <<'PY' || return 1
-import json, sys
-path, bound, foreign_short, mode = sys.argv[1:5]
-report = json.loads(open(path, encoding="utf-8").read())
-repo = report.get("repo")
-git = report.get("git") if isinstance(report.get("git"), dict) else {}
-head = git.get("head")
-dirty = git.get("dirty_worktree", report.get("dirty_worktree"))
-errors = []
-if repo != ".":
-    errors.append(f"repo={repo!r}")
-if not isinstance(head, str) or not bound.startswith(head):
-    errors.append(f"git.head={head!r}")
-if dirty is not False:
-    errors.append(f"dirty={dirty!r}")
-if head == foreign_short:
-    errors.append("foreign short head retained")
-if errors:
-    print(f"{mode}: " + "; ".join(errors), file=sys.stderr)
-    sys.exit(1)
-PY
+  if ! jq -e --arg bound "$bound_head" --arg foreign "$foreign_short" '
+    (.git // {}) as $git
+    | ($git.head // "") as $head
+    | ($git.dirty_worktree // .dirty_worktree // null) as $dirty
+    | .repo == "."
+      and ($head | type) == "string"
+      and ($head | test("^[0-9a-f]{7,40}$"))
+      and ($bound | startswith($head))
+      and $head != $foreign
+      and $dirty == false
+  ' "$report_path" >/dev/null; then
+    printf '%s: score report is not bound to the canonical source\n' "$mode" >&2
+    return 1
+  fi
 }
 
 # Local + release labels exercise the same scrubbed spawn under foreign ambient Git.

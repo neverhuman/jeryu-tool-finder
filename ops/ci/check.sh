@@ -4,12 +4,15 @@
 set -euo pipefail
 source ops/ci/lib.sh
 require_tool jq
+require_tool shellcheck
 
 # Shell entrypoints and their dispatch test must parse.
 for script in scripts/*.sh tools/*.sh tests/*.sh ops/*.sh ops/ci/*.sh; do
   [[ -e "$script" ]] || continue
   bash -n "$script"
 done
+mapfile -t shell_scripts < <(git ls-files '*.sh' | sort)
+shellcheck -S warning "${shell_scripts[@]}"
 
 bash tests/ci_local_dispatch_test.sh
 bash tests/source_authority_test.sh

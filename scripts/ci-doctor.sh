@@ -35,7 +35,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)/ops/ci/lib.sh"
 require_jankurai
 
 # Required: the full product gate fails closed without these.
-required=(bash python3 git cargo jq jankurai gitleaks actionlint cargo-audit syft)
+required=(bash git cargo jq jankurai gitleaks actionlint cargo-audit cargo-deny shellcheck syft)
 # Optional: `just` is a convenience wrapper around the canonical scripts.
 optional=(just)
 
@@ -55,7 +55,7 @@ for tool in "${optional[@]}"; do
   if command -v "$tool" >/dev/null 2>&1; then
     printf '  ok   %s (%s)\n' "$tool" "$(command -v "$tool")"
   else
-    printf '  --   %s (optional; lane degrades gracefully)\n' "$tool"
+    printf '  --   %s (optional convenience wrapper)\n' "$tool"
   fi
 done
 

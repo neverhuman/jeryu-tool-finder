@@ -5,7 +5,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd -P)"
 cd "$repo_root"
 source "$repo_root/ops/ci/lib.sh"
 source "$repo_root/ops/ci/source-authority.sh"
-for tool in jq cargo gitleaks actionlint cargo-audit syft; do
+for tool in jq cargo gitleaks actionlint cargo-audit cargo-deny syft; do
   require_tool "$tool"
 done
 
@@ -65,11 +65,10 @@ if [[ -f Cargo.toml ]]; then
   cargo_bin="$(command -v cargo)"
   jeryu_with_scrubbed_git "$cargo_bin" metadata --locked --offline --format-version 1 --no-deps >/dev/null
 fi
-# Full dependency review (advisories, licenses, sources) when network allowed.
-if [[ "${JERYU_SECURITY_NETWORK:-0}" == "1" ]] && command -v cargo-deny >/dev/null 2>&1 && [[ -f deny.toml ]]; then
-  cargo_deny_bin="$(command -v cargo-deny)"
-  jeryu_with_scrubbed_git "$cargo_deny_bin" check
-fi
+# License, ban, and source policy is mandatory and does not fetch. Advisory
+# freshness is enforced separately by the fail-closed cached cargo-audit step.
+cargo_deny_bin="$(command -v cargo-deny)"
+jeryu_with_scrubbed_git "$cargo_deny_bin" check bans licenses sources --disable-fetch
 cargo_audit_status="skipped-no-lock"
 if [[ -f Cargo.lock ]]; then
   cargo_audit_bin="$(command -v cargo-audit)"
@@ -147,7 +146,7 @@ jq -nS \
       "actionlint",
       "env-file",
       "cargo-metadata",
-      "optional-cargo-deny",
+      "cargo-deny-locked-policy",
       "cargo-audit-no-fetch",
       "syft-sbom"
     ],
