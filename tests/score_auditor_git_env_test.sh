@@ -96,7 +96,8 @@ assert_report_bound() {
   if ! jq -e --arg bound "$bound_head" --arg foreign "$foreign_short" '
     (.git // {}) as $git
     | ($git.head // "") as $head
-    | ($git.dirty_worktree // .dirty_worktree // null) as $dirty
+    | (if ($git | has("dirty_worktree")) then $git.dirty_worktree
+       elif has("dirty_worktree") then .dirty_worktree else null end) as $dirty
     | .repo == "."
       and ($head | type) == "string"
       and ($head | test("^[0-9a-f]{7,40}$"))
