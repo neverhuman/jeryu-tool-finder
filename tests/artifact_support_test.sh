@@ -21,6 +21,8 @@ security_saved=''
 score_saved=''
 stale_saved=''
 stale_owned=false
+receipt_jobs=''
+alternate_jobs=''
 
 cleanup() {
   rm -f -- "$test_dir/.receipt-hardlink" \
@@ -152,6 +154,14 @@ tamper_evidence() {
 }
 
 bash "$validator" --validate-receipt >/dev/null
+receipt_jobs="$(jq -er '.build.jobs' "$receipt")"
+if [[ "$receipt_jobs" == 1 ]]; then
+  alternate_jobs=2
+else
+  alternate_jobs=1
+fi
+JERYU_CI_JOBS="$alternate_jobs" CARGO_BUILD_JOBS="$alternate_jobs" \
+  bash "$validator" --validate-receipt >/dev/null
 
 ln -- "$artifact" "$test_dir/.artifact-hardlink"
 expect_invalid 'multiply linked support artifact passed validation'
@@ -193,6 +203,10 @@ tamper_receipt 'VERSION digest mismatch passed validation' '.inputs.version.sha2
 tamper_receipt 'source digest mismatch passed validation' '.source.tracked_inputs_sha256 = ("0" * 64)'
 tamper_receipt 'Cargo tool digest mismatch passed validation' '.build.cargo.sha256 = ("0" * 64)'
 tamper_receipt 'private-target policy mismatch passed validation' '.build.target_policy = "repo-target"'
+tamper_receipt 'out-of-range recorded build jobs passed validation' \
+  '.build.jobs = 0 | .build.command = "cargo build --locked --offline --release --bin jeryu-tool-finder --jobs 0"'
+tamper_receipt 'build command and recorded jobs mismatch passed validation' \
+  '.build.command += " "'
 
 ln -- "$score" "$repo_root/target/jankurai/.evidence-hardlink"
 expect_invalid 'multiply linked score evidence passed validation'

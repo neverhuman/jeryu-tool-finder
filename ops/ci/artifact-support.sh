@@ -506,10 +506,14 @@ require_private_build_output() {
 
 receipt_matches() {
   local receipt_path="$1" binary_path="$2"
-  local binary_sha binary_size command
+  local expected_jobs='null'
+  local binary_sha binary_size command_prefix
+  if [[ $# -ge 3 ]]; then
+    expected_jobs="$3"
+  fi
   binary_sha="$(sha_file "$binary_path")"
   binary_size="$(stat -c '%s' -- "$binary_path")"
-  command="cargo build --locked --offline --release --bin $binary_name --jobs $build_jobs"
+  command_prefix="cargo build --locked --offline --release --bin $binary_name --jobs "
   jq -e \
     --arg head "$current_head" --arg tree "$current_tree" \
     --arg source_sha "$current_source_sha" --arg binary_sha "$binary_sha" \
@@ -521,11 +525,11 @@ receipt_matches() {
     --arg rust_toolchain_sha "$rust_toolchain_sha" --arg version_sha "$version_file_sha" \
     --arg cli_help_sha "$cli_help_sha" --arg score_sha "$score_evidence_sha" \
     --arg security_sha "$security_evidence_sha" --arg authority_mode "$build_authority_mode" \
-    --arg command "$command" --arg cargo_path "$cargo_bin" --arg cargo_sha "$cargo_sha" \
+    --arg command_prefix "$command_prefix" --arg cargo_path "$cargo_bin" --arg cargo_sha "$cargo_sha" \
     --arg cargo_version "$cargo_version" --arg rustc_path "$rustc_bin" \
     --arg rustc_sha "$rustc_sha" --arg rustc_version "$rustc_version" \
     --arg cargo_config_sha "$cargo_home_config_sha" \
-    --arg git_config_sha "$git_global_config_sha" --argjson jobs "$build_jobs" '
+    --arg git_config_sha "$git_global_config_sha" --argjson expected_jobs "$expected_jobs" '
       keys == ["artifact", "build", "evidence", "head", "inputs", "release", "repo", "schema_version", "source", "status", "tree"] and
       .schema_version == "jeryu.split.artifact-support/v2" and
       .repo == "jeryu-tool-finder" and .status == "ready" and
@@ -555,17 +559,21 @@ receipt_matches() {
         score: {path: "target/jankurai/evidence.json", sha256: $score_sha},
         security: {path: "target/security/evidence.json", sha256: $security_sha}
       } and
-      .build == {
-        authority_mode: $authority_mode,
-        command: $command,
-        profile: "release",
-        jobs: $jobs,
-        target_policy: "fresh-private-target-no-preseed-v1",
-        cargo: {path: $cargo_path, sha256: $cargo_sha, version_output: $cargo_version},
-        rustc: {path: $rustc_path, sha256: $rustc_sha, version_output: $rustc_version},
-        cargo_home_config_sha256: $cargo_config_sha,
-        git_global_config_sha256: $git_config_sha
-      }
+      (.build.jobs as $receipt_jobs |
+        ($receipt_jobs |
+          if type == "number" then . >= 1 and . <= 256 and . == floor else false end) and
+        ($expected_jobs == null or $receipt_jobs == $expected_jobs) and
+        .build == {
+          authority_mode: $authority_mode,
+          command: ($command_prefix + ($receipt_jobs | tostring)),
+          profile: "release",
+          jobs: $receipt_jobs,
+          target_policy: "fresh-private-target-no-preseed-v1",
+          cargo: {path: $cargo_path, sha256: $cargo_sha, version_output: $cargo_version},
+          rustc: {path: $rustc_path, sha256: $rustc_sha, version_output: $rustc_version},
+          cargo_home_config_sha256: $cargo_config_sha,
+          git_global_config_sha256: $git_config_sha
+        })
     ' "$receipt_path" >/dev/null
 }
 
@@ -715,7 +723,7 @@ produce_receipt() {
   ' >"$receipt_tmp"
   chmod 0600 "$receipt_tmp"
 
-  receipt_matches "$receipt_tmp" "$artifact_tmp" ||
+  receipt_matches "$receipt_tmp" "$artifact_tmp" "$build_jobs" ||
     die 'candidate artifact receipt is internally inconsistent'
   verify_score_evidence
   verify_security_evidence

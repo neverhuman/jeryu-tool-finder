@@ -61,7 +61,10 @@ the same source digest; score also binds the exact verified auditor and its
 installation receipt where applicable. Re-running
 `ops/ci/artifact-support.sh --validate-receipt` recomputes every digest and
 refuses dirty, hidden-index, ambient-Git, symlinked, externally hard-linked,
-stale, overridden, or incomplete custody.
+stale, overridden, or incomplete custody. Readback validates the recorded
+bounded worker count and exact build command independently of the load
+governor's current worker count; receipt generation still binds the count that
+performed the build.
 
 ## Rollback
 
