@@ -80,6 +80,16 @@
       "lane": "docs",
       "purpose": "verify agent-readable docs remain routed and auditable"
     },
+    "db/": {
+      "command": "just score",
+      "lane": "data",
+      "purpose": "verify Tool Finder documents that it owns no product schema"
+    },
+    "db/**": {
+      "command": "just score",
+      "lane": "data",
+      "purpose": "verify Tool Finder documents that it owns no product schema"
+    },
     "fixtures/": {
       "command": "just check",
       "lane": "check",

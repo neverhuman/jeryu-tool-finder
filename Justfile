@@ -1,6 +1,12 @@
 set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+export CARGO_INCREMENTAL := "1"
+export CARGO_TERM_COLOR := "always"
 
-# Full product gate (no `fast`/pin lane — the jankurai pin is owned by jeryu-tool).
+# Targeted library/bin check used by local agents and CI cache warm-up.
+fast:
+  cargo test --locked --lib --bins --jobs 8
+
+# Full product gate (no pin lane — the jankurai pin is owned by jeryu-tool).
 default:
   ./ops/ci/check.sh
   ./ops/ci/score.sh

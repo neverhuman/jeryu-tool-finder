@@ -1,0 +1,22 @@
+schema_version = "1.0.0"
+
+[[tools]]
+id = "audit-ci"
+mode = "auto"
+
+[[tools]]
+id = "security"
+mode = "auto"
+
+[[tools]]
+id = "contract-drift"
+mode = "auto"
+[[tools]]
+id = "proofbind"
+mode = "disabled"
+[[tools]]
+id = "proofmark-rust"
+mode = "disabled"
+[[tools]]
+id = "rust-witness"
+mode = "disabled"

@@ -16,6 +16,8 @@
     "VERSION": "release",
     "agent/": "agent",
     "deny.toml": "ops",
+    "db/": "data",
+    "db/**": "data",
     "docs/": "docs",
     "docs/**": "docs",
     "dossiers/": "finder",

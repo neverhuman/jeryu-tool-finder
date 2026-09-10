@@ -5,6 +5,11 @@ tests over scan → dossier → propose. Deterministic lane entrypoints live und
 `ops/ci/`; the protected hosted check and local commands invoke the same
 scripts.
 
+Repair receipts and raw lane logs live under `target/jankurai/` and
+`target/artifact-support/`. A failed lane keeps those artifacts; do not
+summarize them away. Cost work stops at the zero budget in
+`agent/cost-budget.toml`.
+
 ## Local gate
 
 Run the full gate with one command:
