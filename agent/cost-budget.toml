@@ -3,6 +3,13 @@ schema_version = "1.0.0"
 [global]
 kill_switch_env = "JERYU_FINDER_BENCH_KILL"
 
+[stop_conditions]
+bench_halt_on_kill_switch = true
+bench_halt_on_wall_clock_overrun = true
+spend_cap_usd = 0
+quota = "zero paid API calls"
+
+
 [bench]
 max_wall_clock_seconds = 600
 max_ci_concurrent_jobs = 4

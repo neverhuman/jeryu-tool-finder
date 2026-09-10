@@ -4,6 +4,8 @@ export CARGO_TERM_COLOR := "always"
 
 # Targeted library/bin check used by local agents and CI cache warm-up.
 fast:
+  cargo check -p jeryu-tool-finder
+  cargo nextest run -p jeryu-tool-finder --lib
   cargo test --locked --lib --bins --jobs 8
 
 # Full product gate (no pin lane — the jankurai pin is owned by jeryu-tool).

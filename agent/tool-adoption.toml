@@ -5,18 +5,65 @@ id = "audit-ci"
 mode = "auto"
 
 [[tools]]
-id = "security"
-mode = "auto"
+id = "proof-routing"
+mode = "disabled"
 
 [[tools]]
 id = "contract-drift"
 mode = "auto"
+
+[[tools]]
+id = "authz-matrix"
+mode = "disabled"
+
+[[tools]]
+id = "input-boundary"
+mode = "disabled"
+
+[[tools]]
+id = "agent-tool-supply"
+mode = "disabled"
+
+[[tools]]
+id = "release-readiness"
+mode = "disabled"
+
+[[tools]]
+id = "copy-code"
+mode = "disabled"
+
+[[tools]]
+id = "security"
+mode = "disabled"
+
+[[tools]]
+id = "ci-bad-behavior"
+mode = "disabled"
+
+[[tools]]
+id = "git-bad-behavior"
+mode = "disabled"
+
+[[tools]]
+id = "release-bad-behavior"
+mode = "disabled"
+
+[[tools]]
+id = "ux-qa"
+mode = "disabled"
+
+[[tools]]
+id = "cost-budget"
+mode = "disabled"
+
 [[tools]]
 id = "proofbind"
 mode = "disabled"
+
 [[tools]]
 id = "proofmark-rust"
 mode = "disabled"
+
 [[tools]]
 id = "rust-witness"
 mode = "disabled"

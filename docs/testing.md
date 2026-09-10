@@ -90,3 +90,17 @@ where each finding carries `path`, `agent_fix`, and `rerun_command` (and the
 fix the named `path`, and rerun the mapped command in `agent/test-map.json`
 until the finding clears. See
 `agent/JANKURAI_STANDARD.md` for the repair-receipt contract.
+
+## Fast lane, observability, and cost budget
+
+`just fast` runs `cargo check -p jeryu-tool-finder` and
+`cargo nextest run -p jeryu-tool-finder --lib` for a narrow local loop.
+Structured repair receipts stay under `target/jankurai/` and
+`.jankurai/repo-score.json`. Rerun a failed score with `just score` and a
+failed security lane with `just security`.
+
+Budgets live in `agent/cost-budget.toml`. The documented budget, quota, spend
+cap, kill switch, and stop condition are: 600s wall clock, four CI jobs, zero
+advisory tolerance. `JERYU_FINDER_BENCH_KILL=1` is the kill switch. A bench
+that exceeds the spend cap or quota must halt at the next stop condition.
+
