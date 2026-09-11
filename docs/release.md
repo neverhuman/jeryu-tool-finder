@@ -1,35 +1,40 @@
 # Release
 
-`jeryu-tool-finder` ships **no binary of its own** — it is pure Python scripts
-plus docs. A "release" here is a split tag that pins the discovery scripts and
-the dossier/proposal contract the rest of the family consumes.
+`jeryu-tool-finder` ships one Rust CLI. A release binds that executable, its
+public help contract, exact source/tree, immutable Intelligence dependency,
+score evidence, security evidence, and lockfile in a deterministic
+artifact-support receipt.
 
 ## Version source
 
-The version source is the `VERSION` file (the split tag, e.g.
-`jeryu-tool-finder-v5.1.0-split.0`). Release notes are recorded in
-[`CHANGELOG.md`](../CHANGELOG.md). The signed release artifacts for the whole
-family are published by `neverhuman/jeryu-deploy`; this repo contributes only its
-source at the pinned tag.
+The release tag source is `VERSION` (for example,
+`jeryu-tool-finder-v5.1.0-split.0`); its semver must equal the Cargo package
+version and the compiled CLI's exact `--version` output. Release notes are recorded in
+[`CHANGELOG.md`](../CHANGELOG.md). The sole family release authority is
+`../jeryu-release-ops/repos.manifest.toml`; release transport follows the
+protected `git.neverhuman.org` lifecycle and immutable tag rules.
 
 ## Release gate
 
 Before a release or split tag is promoted, confirm the full launch gate:
 
-- run the full gate locally: `bash scripts/ci-local.sh` (or `just`), which runs
-  `ops/ci/check.sh` (script compile + `dossier.py --selftest`), `ops/ci/score.sh`
-  (the pinned jankurai audit), and `ops/ci/security.sh`
-- confirm the same lanes are green in hosted CI (`.github/workflows/ci.yml` runs
-  check → score → security, at parity with the local gate)
+- run `bash scripts/ci-local.sh required` (or `just`): locked Rust check, score,
+  security, CLI contract drift, and artifact support, in that order
+- require the protected hosted `jeryu-tool-finder/required` check at the exact
+  candidate head; the checked-in workflow is a parity artifact, not authority
 - confirm `scripts/ci-doctor.sh` reports all required tooling present
-- confirm the **security** lane is green: gitleaks (secret scan), actionlint
-  (workflow lint), and the committed-`.env` guard all pass
-- confirm **checksum, provenance, and SBOM** policy: there is no compiled
-  artifact here, so the provenance is the immutable tagged source plus the
-  fingerprinted audit evidence in `target/jankurai/repo-score.json`
-- confirm **backups / reproducible inputs exist for rollback**: the prior split
-  tag is the backup; `dossiers/` is regenerable from the engine, never a backup
-  dependency
+- confirm the **security** lane is green: Gitleaks, Actionlint, Cargo deny,
+  cached Cargo audit, SBOM generation, and the committed-`.env` guard all pass
+- validate `target/artifact-support/jeryu-tool-finder.json`: `status=ready`,
+  exact head/tree, the single-link mode-0555
+  `target/artifact-support/jeryu-tool-finder` CLI checksum/size, VERSION/Cargo/
+  toolchain/help digests, exact governed Cargo/rustc identity, fresh-private-
+  target policy, and exact score/security evidence digests
+- confirm the security evidence says Cargo audit `clean` and SPDX `generated`;
+  missing tools or incomplete evidence leave artifact support red
+- confirm **backups / reproducible inputs exist for rollback**: retain the prior
+  split tag when one exists; first-release rollback leaves the candidate unused;
+  `dossiers/` is regenerable from the engine, never a backup dependency
 - confirm **monitoring** of the rollout: the score lane is the live monitor — it
   fails the gate the moment the repo drops below floor or grows a cap
 - confirm **rate-limit / abuse / budget controls**: this repo exposes no public
@@ -40,31 +45,35 @@ Before a release or split tag is promoted, confirm the full launch gate:
 
 ## Release automation & command policy
 
-The release gate is script-driven and deterministic: the lanes in `ops/ci/` are
-the automation. CI (`.github/workflows/ci.yml`) and the local runner
-(`scripts/ci-local.sh`) and the pre-push hook (`ops/git-hooks/pre-push`) all call
-the **same** `ops/ci/*.sh` scripts, so a release can never pass CI while failing
-locally. No release step mutates state outside the working tree except
-`propose.py`, which writes into the sibling `jeryu-tool` registry and must keep
-`jeryu-tool`'s `ops/registry_summary.py --check` green.
+The release gate is script-driven and deterministic. The protected hosted gate,
+local runner, Just recipes, and pre-push hook compose the same repository-owned
+lanes. The `propose` command is the one product operation that mutates a sibling
+checkout; it writes into the `jeryu-tool` registry and must keep
+`jeryu-tool`'s Rust-backed `ops/registry-summary.sh --check` green.
 
 ## Integrity & provenance
 
-The release coordinate is the immutable git commit at the split tag. There is no
-compiled artifact to checksum or SBOM here; provenance is the tagged source plus
-the audit evidence the score lane writes to `target/jankurai/repo-score.json`
-(fingerprinted: `report_fingerprint`, `input_fingerprint`, `policy_fingerprint`).
-The pinned auditor itself is governed by `jeryu-tool`'s `tool-manifest.toml`; this
-repo verifies it via `jankurai --version` in `ops/ci/lib.sh` before scoring.
+The release coordinate is the immutable git commit at the split tag. The
+artifact-support receipt binds the release executable to that commit/tree,
+physical tracked-input digest, release identity, governed build tools, locked
+inputs, CLI contract, score sidecar, and security sidecar. Those sidecars bind
+the same source digest; score also binds the exact verified auditor and its
+installation receipt where applicable. Re-running
+`ops/ci/artifact-support.sh --validate-receipt` recomputes every digest and
+refuses dirty, hidden-index, ambient-Git, symlinked, externally hard-linked,
+stale, overridden, or incomplete custody. Readback validates the recorded
+bounded worker count and exact build command independently of the load
+governor's current worker count; receipt generation still binds the count that
+performed the build.
 
 ## Rollback
 
-Rollback restores the previous split tag: check out the prior `VERSION` commit,
-re-run `bash scripts/ci-local.sh` to confirm the older gate is still green, and
-re-tag if a repair release is needed. Do **not** overwrite a published split tag —
-publish a new repair tag instead. `dossiers/` is a regenerated zone, so no
-release rollback ever needs to touch it; re-run `just scan && just dossier` to
-rebuild it from the engine.
+Once a prior immutable tag exists, rollback restores that tag and reruns
+`bash scripts/ci-local.sh required`. For the first tag, rollback means leaving
+the candidate unused and repairing through a newly reviewed successor. Do
+**not** overwrite a published split tag—publish a new repair tag instead.
+`dossiers/` is a regenerated zone, so rollback never needs to touch it; rerun
+`just scan && just dossier` to rebuild it from the engine.
 
 ## Auditor-only CI cutovers
 

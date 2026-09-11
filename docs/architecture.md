@@ -9,11 +9,13 @@ strongest clusters as shared-tool proposals into the `jeryu-tool` registry.
 This repo keeps the family's **public-portal** profile (the `-tool`/`-tool-finder`
 convention; see `agent/boundaries.toml`) while carrying a single all-Rust binary. The
 cross-repo clustering engine lives in `jeryu-intelligence/crates/jeryu-codegraph`
-and is consumed **as a library**: `Cargo.toml` pins a public git tag, and the
-`[patch]` section redirects to the local split checkout during family
-development — the same wiring jeryu-deploy uses. The engine is therefore ONE
-implementation shared by this CLI, the live `/tools` dashboard on :8787, and
-the MCP tools, so cluster ids, categories, and LOC numbers always agree.
+and is consumed **as a library**: `Cargo.toml` preserves the immutable
+`jeryu-intelligence-v5.0.0-split.1` source coordinate and `Cargo.lock` binds its
+exact commit. Governed longest-prefix Git rewrites and Cargo's CLI transport
+resolve those stable source-identity bytes through `git.neverhuman.org`; no path
+patch or ambient sibling checkout participates. The engine is therefore one
+implementation shared by this CLI, the dashboard, and the MCP tools, so cluster
+ids, categories, and LOC numbers always agree.
 
 ## Components
 
@@ -34,11 +36,12 @@ the MCP tools, so cluster ids, categories, and LOC numbers always agree.
   proposal (`[[tool]]` with `status=proposed` plus a `tasks/NNNN-*.toml` build
   task). Idempotent on `origin_cluster`; appends as text so registry comments
   survive. This is the one subcommand that mutates a sibling repo.
-- **`src/summary.rs`** — delegates to `jeryu-tool/ops/registry_summary.py`,
+- **`src/summary.rs`** — delegates to `jeryu-tool/ops/registry-summary.sh`,
   the registry owner's authoritative summary implementation.
 - **`ops/ci/`** — the deterministic CI gate (`check` / `score` / `security`)
-  and the shared `lib.sh`; `scripts/` keeps the gate wrapper shells
-  (`ci-doctor.sh`, `ci-local.sh`).
+  plus the public CLI `contract-drift` and evidence-bound `artifact-support`
+  lanes; `scripts/` keeps the gate wrapper shells (`ci-doctor.sh`,
+  `ci-local.sh`).
 
 ## Data flow
 
