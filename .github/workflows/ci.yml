@@ -67,10 +67,7 @@ jobs:
       - name: check
         run: bash ops/ci/check.sh
       - name: score (jankurai audit)
-        run: |
-          jankurai security run . --strict --profile ci --out target/jankurai/security/evidence.json
-          bash ops/ci/score.sh
-          jankurai audit . --mode ratchet --baseline target/jankurai/accepted-baseline.json --json target/jankurai/repo-score.json --md target/jankurai/repo-score.md
+        run: bash ops/ci/hosted-score-lane.sh
       - name: security
         run: bash ops/ci/security.sh
       - name: contract drift

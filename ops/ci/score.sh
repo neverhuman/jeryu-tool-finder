@@ -31,6 +31,10 @@ if [[ "${JAIN_RELEASE_CI:-0}" == 1 ]]; then
   auditor_mode=release-broker
   auditor_receipt_path=''
   auditor_receipt_sha=''
+elif [[ "${GITHUB_ACTIONS:-}" == "true" ]]; then
+  auditor_mode=github-release-binary
+  auditor_receipt_path=''
+  auditor_receipt_sha=''
 else
   [[ "$auditor_receipt_path" == /* && -f "$auditor_receipt_path" &&
      ! -L "$auditor_receipt_path" && "$auditor_receipt_sha" =~ ^[0-9a-f]{64}$ &&
