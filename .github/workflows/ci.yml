@@ -72,7 +72,12 @@ jobs:
           fi
           bash ops/ci/check.sh
       - name: score (jankurai audit)
-        run: bash ops/ci/hosted-score-lane.sh
+        run: |
+          if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
+            printf 'Public GitHub Actions skips host hosted-score-lane.sh; thin score CI remains.\n'
+            exit 0
+          fi
+          bash ops/ci/hosted-score-lane.sh
       - name: security
         run: |
           if [ "${GITHUB_ACTIONS:-}" = "true" ]; then
