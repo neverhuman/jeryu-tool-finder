@@ -18,6 +18,7 @@ use clap::{Parser, Subcommand};
 #[derive(Parser)]
 #[command(
     name = "jeryu-tool-finder",
+    version,
     about = "Cross-repo duplicate-code discovery: scan, dossier, and propose shared tools"
 )]
 struct Cli {

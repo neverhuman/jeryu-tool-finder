@@ -2,8 +2,8 @@
 //! cross-repo clusters to `dossiers/clusters.json` for `dossier` to enrich.
 //!
 //! Two scopes:
-//! * default — the family listed in `--manifest` (parity with the historical
-//!   `scan_family.py`),
+//! * default — the family listed in `--manifest` (parity with the predecessor
+//!   scan command),
 //! * `--system` — EVERY split family on the host (manifest-sibling discovery,
 //!   gitignore-aware walking, overlap merging, categories, pattern families).
 

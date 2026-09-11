@@ -5,6 +5,29 @@ tag it carries is the release coordinate for the family.
 
 ## Unreleased
 
+### Changed (2026-09-03: hosted green catch-up)
+- Forward-ported the preserved exact-source, contract, score, security, and
+  artifact-proof train onto current protected main; refreshed the governed
+  Jankurai 1.6.11 wrapper from hosted Tool authority.
+- Restored `summary` against `jeryu-tool`'s current Rust-backed registry wrapper,
+  rejecting symlinked or multiply linked entrypoints and preserving argument
+  and exit-status propagation.
+- Made Cargo deny and ShellCheck mandatory, removed Python from Tool Finder's
+  own score/test gate, and identified `git.neverhuman.org` as repository and
+  release transport without changing the stable Cargo dependency URL identity.
+
+### Changed (2026-08-16: product proof lanes)
+- Added a tracked Rust CLI help contract and standalone `contract-drift` lane.
+- Added exact-head score/security sidecars and an artifact-support receipt that
+  reports `ready` only for a digest-bound release CLI, truthful VERSION/Cargo/
+  `--version` identity, governed auditor and build tools, fresh private build,
+  clean Cargo audit, and valid SPDX document. Evidence now rejects ambient Git,
+  hidden-index, ignored-input, replacement/alternate-object, and build-override
+  substitution.
+- Removed ambient sibling path patches and pinned `jeryu-codegraph` to immutable
+  source coordinate `jeryu-intelligence-v5.0.0-split.1`, transported through
+  the governed hosted rewrite.
+
 ### Changed (2026-06-12: all-Rust rewrite, system-wide scope)
 - The whole pipeline is now a single Rust binary (`src/`,
   `cargo run -- scan|dossier|propose|summary`); the Python scripts are gone.

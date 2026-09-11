@@ -349,6 +349,7 @@ checksum = "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
 [[package]]
 name = "jeryu-codegraph"
 version = "5.0.0"
+source = "git+http://127.0.0.1:8787/git/jeryu/jeryu-intelligence.git?tag=jeryu-intelligence-v5.0.0-split.1#6fb845c594c3e5e9ffea8047d8a3f814fa9ba4da"
 dependencies = [
  "anyhow",
  "blake3",
@@ -364,10 +365,11 @@ dependencies = [
 [[package]]
 name = "jeryu-rustjet"
 version = "5.0.0"
+source = "git+http://127.0.0.1:8787/git/jeryu/jeryu-intelligence.git?tag=jeryu-intelligence-v5.0.0-split.1#6fb845c594c3e5e9ffea8047d8a3f814fa9ba4da"
 
 [[package]]
 name = "jeryu-tool-finder"
-version = "5.0.0"
+version = "5.1.0"
 dependencies = [
  "anyhow",
  "clap",
