@@ -1,8 +1,9 @@
 # Release
 
-`jeryu-tool-finder` ships **no binary of its own** — it is pure Python scripts
-plus docs. A "release" here is a split tag that pins the discovery scripts and
-the dossier/proposal contract the rest of the family consumes.
+`jeryu-tool-finder` is a single Rust CLI (`cargo build --release`, `just
+build`). A "release" here is a split tag that pins the CLI source and the
+dossier/proposal contract the rest of the family consumes; the family's signed
+artifacts are built and published by `jeryu-deploy`.
 
 ## Version source
 
@@ -17,16 +18,17 @@ source at the pinned tag.
 Before a release or split tag is promoted, confirm the full launch gate:
 
 - run the full gate locally: `bash scripts/ci-local.sh` (or `just`), which runs
-  `ops/ci/check.sh` (script compile + `dossier.py --selftest`), `ops/ci/score.sh`
+  `ops/ci/check.sh` (fmt + clippy + `cargo test`, including `dossier --selftest`), `ops/ci/score.sh`
   (the pinned jankurai audit), and `ops/ci/security.sh`
 - confirm the same lanes are green in hosted CI (`.github/workflows/ci.yml` runs
   check → score → security, at parity with the local gate)
 - confirm `scripts/ci-doctor.sh` reports all required tooling present
 - confirm the **security** lane is green: gitleaks (secret scan), actionlint
   (workflow lint), and the committed-`.env` guard all pass
-- confirm **checksum, provenance, and SBOM** policy: there is no compiled
-  artifact here, so the provenance is the immutable tagged source plus the
-  fingerprinted audit evidence in `target/jankurai/repo-score.json`
+- confirm **checksum, provenance, and SBOM** policy: this repo publishes no
+  artifact of its own, so the provenance is the immutable tagged source (with
+  the committed `Cargo.lock` and `cargo deny` policy) plus the fingerprinted
+  audit evidence in `target/jankurai/repo-score.json`
 - confirm **backups / reproducible inputs exist for rollback**: the prior split
   tag is the backup; `dossiers/` is regenerable from the engine, never a backup
   dependency
@@ -34,8 +36,8 @@ Before a release or split tag is promoted, confirm the full launch gate:
   fails the gate the moment the repo drops below floor or grows a cap
 - confirm **rate-limit / abuse / budget controls**: this repo exposes no public
   runtime surface and runs no paid or unbounded operation, so these are N/A by
-  design; the only external work is the codegraph engine invocation, bounded by
-  `--min-repos` and the local repo set
+  design; the only heavy work is the in-process codegraph scan, bounded by
+  `--min-repos`, `--top`, and the local repo set
 - update `CHANGELOG.md` and bump `VERSION` to the new split tag
 
 ## Release automation & command policy
@@ -45,13 +47,13 @@ the automation. CI (`.github/workflows/ci.yml`) and the local runner
 (`scripts/ci-local.sh`) and the pre-push hook (`ops/git-hooks/pre-push`) all call
 the **same** `ops/ci/*.sh` scripts, so a release can never pass CI while failing
 locally. No release step mutates state outside the working tree except
-`propose.py`, which writes into the sibling `jeryu-tool` registry and must keep
-`jeryu-tool`'s `ops/registry_summary.py --check` green.
+`jeryu-tool-finder propose`, which writes into the sibling `jeryu-tool` registry
+and must keep `jeryu-toolctl registry-summary --check` green.
 
 ## Integrity & provenance
 
-The release coordinate is the immutable git commit at the split tag. There is no
-compiled artifact to checksum or SBOM here; provenance is the tagged source plus
+The release coordinate is the immutable git commit at the split tag. This repo
+publishes no artifact to checksum or SBOM; provenance is the tagged source plus
 the audit evidence the score lane writes to `target/jankurai/repo-score.json`
 (fingerprinted: `report_fingerprint`, `input_fingerprint`, `policy_fingerprint`).
 The pinned auditor itself is governed by `jeryu-tool`'s `tool-manifest.toml`; this

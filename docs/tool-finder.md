@@ -12,23 +12,28 @@ fingerprints fixed-size line windows with BLAKE3, and folds **all repos into one
 index** so a window seen in more than one repo becomes a single cluster with
 `repo_count >= 2`.
 
-This repo is the **operator surface**: scripts that drive that engine across the
-family, render dossiers, and file proposals. It is pure Python + docs and takes
-no Cargo dependency — the engine is a runtime binary.
+This repo is the **operator surface**: the `jeryu-tool-finder` Rust CLI that
+drives that engine across the family, renders dossiers, and files proposals.
+The engine is linked **as a library** (a pinned git tag in `Cargo.toml`, with a
+`[patch]` redirect to the local split checkout), so there is no subprocess and
+one implementation is shared with the live API server.
 
 ## Pipeline
 
-1. **`scan_family.py`** → `dossiers/clusters.json`. Resolves the engine
-   (`JERYU_CODEGRAPH_BIN` → `PATH` → `jeryu-intelligence/target/*` → `cargo run`)
-   and runs `tool-build scan-family --min-repos 2`.
-2. **`dossier.py`** → `dossiers/<cluster>.md` + `dossiers/index.json`. One dossier
+1. **`jeryu-tool-finder scan`** (`just scan`) → `dossiers/clusters.json`. Scans
+   the family in `--manifest` (default `../repos.manifest.toml`), or every split
+   family on the host with `--system`, keeping clusters with `--min-repos 2`.
+2. **`jeryu-tool-finder dossier`** (`just dossier`) → `dossiers/<cluster>.md` + `dossiers/index.json`. One dossier
    per cluster with: per-repo file paths and line ranges, the normalized window
    preview, a suggested tool `kind`/`name`, and the **anticipated LOC saved**.
 3. **decision** — an LLM/agent (or a human) reads a dossier and decides whether
    the cluster is worth extracting into a shared tool.
-4. **`propose.py <cluster_id>`** → appends a `[[tool]]` (`status=proposed`) and a
+4. **`jeryu-tool-finder propose <cluster_id>`** (`just propose <cluster_id>`) → appends a `[[tool]]` (`status=proposed`) and a
    `tasks/NNNN-*.toml` build task to the sibling `jeryu-tool` repo, with a
-   per-repo rollout stub. Idempotent on `origin_cluster`.
+   per-repo rollout stub. Idempotent on `origin_cluster`; `--dry-run` previews.
+5. **`jeryu-tool-finder summary`** (`just summary`) → prints the registry's
+   golden-box numbers via `jeryu-toolctl registry-summary`, run inside the
+   sibling `jeryu-tool` checkout.
 
 ## Dossier fields
 
@@ -49,15 +54,15 @@ grows as repos actually migrate.
 
 The engine caps stored `occurrences` per cluster for compact responses, so for a
 cluster that spans many repos `candidate_repos` (derived from the visible
-occurrences) can **undercount** while `repo_count` stays accurate. `propose.py`
+occurrences) can **undercount** while `repo_count` stays accurate. `propose`
 therefore writes a *starting* candidate list; the reviewing agent is expected to
 widen `target_repos`/`candidate_repos` to the full `repo_count` before the
 rollout. Treat the proposal as a draft, not the final migration set.
 
 ## Why split out (not folded into jeryu-intelligence)
 
-Keeping discovery here, as scripts, means the family gets a dedicated, evolvable
-finder surface (more search modalities, richer dossiers, scheduled scans) without
-adding a Cargo crate or a new version-pin edge. The reusable analysis primitive
+Keeping discovery here, as its own CLI, means the family gets a dedicated, evolvable
+finder surface (more search modalities, richer dossiers, scheduled scans)
+without growing the engine crate's surface. The reusable analysis primitive
 stays in jeryu-intelligence where the rest of codegraph lives; only the
 orchestration is split out.

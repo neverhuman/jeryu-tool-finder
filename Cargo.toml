@@ -18,7 +18,7 @@ description = "Cross-repo duplicate-code discovery: scan, dossier, and propose s
 [dependencies]
 jeryu-codegraph = { git = "https://github.com/neverhuman/jeryu-intelligence.git", tag = "jeryu-intelligence-v5.0.0-split.0", package = "jeryu-codegraph" }
 anyhow = "1"
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "env"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 toml = "0.8"

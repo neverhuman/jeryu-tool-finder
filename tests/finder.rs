@@ -203,3 +203,58 @@ fn dossier_selftest_passes_against_bundled_fixture() {
     );
     assert!(String::from_utf8_lossy(&output.stdout).contains("dossier selftest ok"));
 }
+
+#[cfg(unix)]
+#[test]
+fn summary_delegates_to_toolctl_registry_summary() {
+    use std::os::unix::fs::PermissionsExt;
+
+    let root = tempfile::tempdir().expect("root");
+    let jeryu_tool = root.path().join("jeryu-tool");
+    std::fs::create_dir_all(&jeryu_tool).unwrap();
+    let toolctl = root.path().join("fake-toolctl");
+    let log = root.path().join("toolctl.log");
+    std::fs::write(
+        &toolctl,
+        format!(
+            "#!/bin/sh\nprintf '%s\\n' \"$(pwd)\" \"$@\" > '{}'\n",
+            log.display()
+        ),
+    )
+    .unwrap();
+    std::fs::set_permissions(&toolctl, std::fs::Permissions::from_mode(0o755)).unwrap();
+
+    let output = finder()
+        .arg("summary")
+        .arg("--jeryu-tool")
+        .arg(&jeryu_tool)
+        .arg("--toolctl")
+        .arg(&toolctl)
+        .arg("--check")
+        .output()
+        .expect("run summary");
+    assert!(output.status.success(), "{output:?}");
+    let logged = std::fs::read_to_string(&log).expect("toolctl ran");
+    let lines: Vec<&str> = logged.lines().collect();
+    assert_eq!(
+        Path::new(lines[0]).canonicalize().unwrap(),
+        jeryu_tool.canonicalize().unwrap()
+    );
+    assert_eq!(&lines[1..], ["registry-summary", "--check"]);
+}
+
+#[test]
+fn summary_reports_missing_toolctl() {
+    let root = tempfile::tempdir().expect("root");
+    let output = finder()
+        .arg("summary")
+        .arg("--jeryu-tool")
+        .arg(root.path())
+        .arg("--toolctl")
+        .arg(root.path().join("no-such-toolctl"))
+        .output()
+        .expect("run summary");
+    assert!(!output.status.success());
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(stderr.contains("registry-summary"), "{stderr}");
+}

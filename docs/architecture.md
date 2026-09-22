@@ -34,7 +34,8 @@ the MCP tools, so cluster ids, categories, and LOC numbers always agree.
   proposal (`[[tool]]` with `status=proposed` plus a `tasks/NNNN-*.toml` build
   task). Idempotent on `origin_cluster`; appends as text so registry comments
   survive. This is the one subcommand that mutates a sibling repo.
-- **`src/summary.rs`** — delegates to `jeryu-tool/ops/registry_summary.py`,
+- **`src/summary.rs`** — runs `jeryu-toolctl registry-summary` (overridable
+  with `--toolctl` / `JERYU_TOOLCTL`) inside the sibling `jeryu-tool` checkout,
   the registry owner's authoritative summary implementation.
 - **`ops/ci/`** — the deterministic CI gate (`check` / `score` / `security`)
   and the shared `lib.sh`; `scripts/` keeps the gate wrapper shells

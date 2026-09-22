@@ -5,5 +5,5 @@ manual_edits = false
 
 [[zones]]
 path = "dossiers/**"
-generator = "python3 scripts/scan_family.py && python3 scripts/dossier.py"
+generator = "jeryu-tool-finder scan && jeryu-tool-finder dossier"
 manual_edits = false

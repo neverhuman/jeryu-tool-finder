@@ -6,7 +6,8 @@
 Agents start at **[AGENTS.md](AGENTS.md)** (the agent entrypoint); deeper docs
 are indexed there and under [`docs/`](docs/).
 
-The **tool-discovery** arm of the jeryu family. Powerful scripts that scan
+The **tool-discovery** arm of the jeryu family. A single all-Rust CLI,
+`jeryu-tool-finder`, that scans
 **every** repo at once, find code that is duplicated across **more than one
 repo**, and turn the strongest clusters into agent-readable dossiers — the leads
 worth extracting into a shared tool.
@@ -15,34 +16,35 @@ worth extracting into a shared tool.
 *discovers candidates* for it. The loop:
 
 ```
-scan_family.py   →  cross-repo clusters         (drives the codegraph engine)
-dossier.py       →  one dossier per cluster      (files, examples, LOC saved)
+jeryu-tool-finder scan     →  cross-repo clusters      (the codegraph engine, linked as a library)
+jeryu-tool-finder dossier  →  one dossier per cluster  (files, examples, LOC saved)
   ↓ an agent/human reads a dossier and decides
-propose.py       →  [[tool]] + build task in jeryu-tool   (status=proposed)
+jeryu-tool-finder propose  →  [[tool]] + build task in jeryu-tool   (status=proposed)
   ↓ jeryu-tool tracks build + adoption + LOC saved
 forge golden box →  shows the payoff on /repos
 ```
 
-## Scripts
+## Subcommands
 
-| Script | What it does |
+| Subcommand | What it does |
 |---|---|
-| `scripts/scan_family.py` | Runs the `jeryu-codegraph tool-build scan-family` engine over `repos.manifest.toml` (all repos into one fingerprint index) and writes `dossiers/clusters.json`. |
-| `scripts/dossier.py` | Enriches each cross-repo cluster into a dossier: per-repo file paths, normalized preview, suggested tool kind/name, and **anticipated LOC saved**. |
-| `scripts/propose.py` | Promotes a chosen cluster into a `jeryu-tool` proposal — a `[[tool]]` entry (`status=proposed`) plus a `tasks/NNNN-*.toml` build task. Idempotent on `origin_cluster`. |
-| `scripts/registry_summary.py` | Reads the golden-box summary from `jeryu-tool` (CLI/MCP convenience). |
+| `scan` | Runs the `jeryu-codegraph` engine over `repos.manifest.toml` (or every split family on the host with `--system`), folding all repos into one fingerprint index, and writes `dossiers/clusters.json`. |
+| `dossier` | Enriches each cross-repo cluster into a dossier: per-repo file paths, normalized preview, suggested tool kind/name, and **anticipated LOC saved**. `dossier --selftest` proves the enrichment offline against `fixtures/sample-clusters.json`. |
+| `propose <cluster_id>` | Promotes a chosen cluster into a `jeryu-tool` proposal — a `[[tool]]` entry (`status=proposed`) plus a `tasks/NNNN-*.toml` build task. Idempotent on `origin_cluster`; `--dry-run` previews. |
+| `summary` | Prints the golden-box registry summary by delegating to `jeryu-toolctl registry-summary` inside the sibling `jeryu-tool` checkout (`--toolctl` / `JERYU_TOOLCTL` override the binary). |
 
-## No version-pin burden
+## Engine wiring
 
-The engine is invoked as a **binary at runtime** (`JERYU_CODEGRAPH_BIN`, then
-`PATH`, then a prebuilt `jeryu-intelligence/target/*/jeryu-codegraph`, then
-`cargo run`). This repo takes **no Cargo dependency** on `jeryu-codegraph`, so the
-family pin graph is unchanged — it is pure scripts + docs.
+The engine is `jeryu-intelligence/crates/jeryu-codegraph`, consumed **as a
+library**: `Cargo.toml` pins a public git tag, and a `[patch]` section redirects
+to the local split checkout for family development (jeryu-deploy's wiring). One
+engine implementation serves this CLI, the live dashboard, and MCP, so cluster
+ids and LOC numbers always agree.
 
 ## Quick start
 
 ```bash
-bash scripts/ci-doctor.sh   # confirm required tooling (python3, git, jankurai)
+bash scripts/ci-doctor.sh   # confirm required tooling (cargo, git, python3, jankurai)
 just                        # the gate: check + score + security
 # or without `just`:
 bash scripts/ci-local.sh    # same lanes CI runs, in CI order
@@ -59,7 +61,8 @@ git config core.hooksPath ops/git-hooks
 ```bash
 just scan       # scan the whole family for cross-repo clusters
 just dossier    # render dossiers from the latest scan
-just summary    # golden-box registry numbers (from jeryu-tool)
+just propose <cluster_id>   # file a proposal into jeryu-tool
+just summary    # golden-box registry numbers (jeryu-toolctl registry-summary)
 just            # the gate: check + score + security
 ```
 
@@ -67,7 +70,7 @@ just            # the gate: check + score + security
 
 - [docs/architecture.md](docs/architecture.md) — components, boundaries, data flow
 - [docs/tool-finder.md](docs/tool-finder.md) — dossier schema, LOC-saved definition
-- [docs/testing.md](docs/testing.md) — CI lanes, the dossier selftest, CI parity
+- [docs/testing.md](docs/testing.md) — CI lanes, the cargo test suite, CI parity
 - [docs/release.md](docs/release.md) — version source, release gate, rollback
 - [CHANGELOG.md](CHANGELOG.md) — release notes
 
