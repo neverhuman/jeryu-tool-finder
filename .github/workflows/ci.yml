@@ -7,10 +7,6 @@ on:
 
 # The jankurai pin is owned by jeryu-tool's tool-manifest.toml; these defaults
 # mirror it (no local pin source lives in this repo, so there is no fast lane).
-env:
-  # BEGIN GENERATED JANKURAI WORKFLOW PIN — DO NOT EDIT
-  # No Jankurai identity is pinned here; see ops/ci/lib.sh require_jankurai.
-  # END GENERATED JANKURAI WORKFLOW PIN
 
 permissions:
   contents: read
